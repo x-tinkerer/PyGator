@@ -80,7 +80,7 @@ def recv_Respons(sock):
             writeToFile(data)
 
 def writeToFile(buf):
-    target = open('00000000', 'a+')
+    target = open('0000000000', 'a+')
     target.write(buf)
     target.close()
 
