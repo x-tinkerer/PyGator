@@ -76,7 +76,13 @@ def recv_Respons(sock):
         if IsSammay(data):
             DecodeSam(data)
         else:
-            print repr(data)
+            #print repr(data)
+            writeToFile(data)
+
+def writeToFile(buf):
+    target = open('00000000', 'a+')
+    target.write(buf)
+    target.close()
 
 def readLEInt(inbytes,size):
     result = 0
