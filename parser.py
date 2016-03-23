@@ -62,21 +62,22 @@ class UnPack:
 def recv_Respons(sock):
     head = sock.recv(5)
     print repr(head)
-    #buftype =ord(head[1])
-    buftype =head.encode()
+    listhead= list(bytearray(head))
+    buftype =listhead[0]
+    #buftype =head.encode("hex")
     if buftype == 1:
-        envlen = readLEInt(head, 4)
+        envlen = readLEInt(head[1:], 4)
         data = sock.recv(envlen)
         print 'Received xml:'
         print data
     elif buftype == 3:
-        envlen = readLEInt(head, 4)
+        envlen = readLEInt(head[1:], 4)
         data = sock.recv(envlen)
         DecodeSam(data)
 
 def readLEInt(inbytes,size):
     result = 0
-    for count in range(0, size):
+    for count in range(0, size-1):
         cur = ord(inbytes[count])
         result |= (cur & 0xff) << (count * 8)
 
