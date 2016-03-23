@@ -1,6 +1,7 @@
 import socket
 import pickle
 import time
+import parser
 
 HOST = 'localhost'
 PORT = 8090
@@ -88,9 +89,15 @@ xmlbytes = bytearray([
 2,0,0,0,0,])
 sock.send(xmlbytes)
 data = sock.recv(1024)
+#parser.DecodeSam(data)
 
 while True:
-    print sock.recv(1024)
+    data = sock.recv(1024)
+    if parser.IsSammay(data):
+        parser.DecodeSam(data)
+
+    for i in range(0,len(data)):
+        print "%d" %(int(data[i]))
 
 time.sleep(10)
 
