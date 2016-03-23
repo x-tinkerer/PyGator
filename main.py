@@ -87,18 +87,12 @@ print 'Start Capture'
 xmlbytes = bytearray([
 2,0,0,0,0,])
 sock.send(xmlbytes)
-parser.recv_Respons(sock)
+parser.recv_Respons(sock)#for get sammary
 time.sleep(1)
 
-time.sleep(100)
 while True:
-    data = sock.recv(1024)
-    if parser.IsSammay(data):
-        parser.DecodeSam(data)
+    parser.recv_Respons(sock)
 
-    for i in range(0,len(data)):
-        print "%d" %(int(data[i]))
-
-time.sleep(10)
+time.sleep(1)
 
 sock.close()

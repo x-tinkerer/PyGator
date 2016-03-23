@@ -73,7 +73,10 @@ def recv_Respons(sock):
     elif buftype == 3:
         envlen = readLEInt(head[1:], 4)
         data = sock.recv(envlen)
-        DecodeSam(data)
+        if IsSammay(data):
+            DecodeSam(data)
+        else:
+            print repr(data)
 
 def readLEInt(inbytes,size):
     result = 0
@@ -131,9 +134,7 @@ def unpackInt64(inbytes):
     return count, result
 
 def IsSammay(sambuf):
-    if (sambuf[0] == 3 and sambuf[5] == 1 and sambuf[6] == 1
-        and sambuf[8] == '1' and sambuf[10] == '2' and sambuf[613] == '3'
-        and sambuf[15] == '4' and sambuf[18] == '5'):
+    if sambuf[1] == 1 and sambuf[2] == 1:
         return True
     else:
         return False
