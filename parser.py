@@ -59,6 +59,30 @@ class UnPack:
     }
 """
 
+def recv_Respons(sock):
+    head = sock.recv(5)
+    print repr(head)
+    #buftype =ord(head[1])
+    buftype =head.encode()
+    if buftype == 1:
+        envlen = readLEInt(head, 4)
+        data = sock.recv(envlen)
+        print 'Received xml:'
+        print data
+    elif buftype == 3:
+        envlen = readLEInt(head, 4)
+        data = sock.recv(envlen)
+        DecodeSam(data)
+
+def readLEInt(inbytes,size):
+    result = 0
+    for count in range(0, size):
+        cur = ord(inbytes[count])
+        result |= (cur & 0xff) << (count * 8)
+
+    return result
+
+
 def readString(inbytes,size):
     result = ''.join(cur for cur in inbytes[:size])
     return size, result
@@ -115,13 +139,6 @@ def IsSammay(sambuf):
 
 def DecodeSam(sambuf):
     mPos=0
-    Bytes, mValue = unpackInt(sambuf[mPos:])
-    mPos += Bytes
-    print "Header Type:" + str(mValue)
-
-    Bytes, mValue = readBytes(sambuf[mPos:],4)
-    mPos += Bytes
-    print "Buffer Size: " + str(mValue)
 
     Bytes, mValue = unpackInt(sambuf[mPos:])
     mPos += Bytes

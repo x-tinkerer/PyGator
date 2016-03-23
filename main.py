@@ -44,12 +44,11 @@ xmlbytes = bytearray([1, 104, 1, 0, 0,                      #haeder
 114,61,34,121,101,115,34,47,62,10,9,60,47,101,110,101,
 114,103,121,95,99,97,112,116,117,114,101,62,10,60,47,115,
 101,115,115,105,111,110,62,10])
-
 sock.send(xmlbytes)
-data = sock.recv(1024)
-print 'Received', repr(data)
+parser.recv_Respons(sock)
+time.sleep(1)
 
-print 'Config captured xml'
+print 'Request Send Captured xml'
 xmlbytes = bytearray([0,66,0,0,0,                           #HEAD
 60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
 46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
@@ -58,10 +57,10 @@ xmlbytes = bytearray([0,66,0,0,0,                           #HEAD
 62,10])
 
 sock.send(xmlbytes)
-data = sock.recv(1024)
-print 'Received', repr(data)
+parser.recv_Respons(sock)
+time.sleep(1)
 
-print 'Config events xml'
+print 'Request Send Event config xml'
 xmlbytes = bytearray([0,64,0,0,0,
 60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
 46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
@@ -69,10 +68,10 @@ xmlbytes = bytearray([0,64,0,0,0,
 116,121,112,101,61,34,101,118,101,110,116,115,34,47,62,10])
 
 sock.send(xmlbytes)
-data = sock.recv(1024)
-print 'Received', repr(data)
+parser.recv_Respons(sock)
+time.sleep(1)
 
-print 'Config counters xml'
+print 'Request Send Counters xml'
 xmlbytes = bytearray([0,66,0,0,0,
 60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
 46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
@@ -81,16 +80,17 @@ xmlbytes = bytearray([0,66,0,0,0,
 62,10])
 
 sock.send(xmlbytes)
-data = sock.recv(1024)
-print 'Received', repr(data)
+parser.recv_Respons(sock)
+time.sleep(1)
 
 print 'Start Capture'
 xmlbytes = bytearray([
 2,0,0,0,0,])
 sock.send(xmlbytes)
-data = sock.recv(1024)
-#parser.DecodeSam(data)
+parser.recv_Respons(sock)
+time.sleep(1)
 
+time.sleep(100)
 while True:
     data = sock.recv(1024)
     if parser.IsSammay(data):
