@@ -1,6 +1,7 @@
+import os
 import struct
 
-sammary = bytearray([
+summary = bytearray([
 0x03,0xaf,0x00,0x00,0x00,0x01,0x01,0x0b,0x31,0x0a,0x32,0x0d,0x0a,0x33,0x0d,0x34,
 0x0a,0x0d,0x35,0xd5,0xe1,0xd8,0xc1,0xf5,0xd1,0x9c,0x9f,0x14,0xff,0xf9,0x9e,0x9a,
 0xb2,0xbe,0xd0,0x00,0x85,0xec,0xd1,0x89,0x97,0xbd,0xc3,0x00,0x05,0x75,0x6e,0x61,
@@ -59,39 +60,44 @@ class UnPack:
     }
 """
 
-def recv_Respons(sock):
+def recv_XML(sock,cfgname):
     head = sock.recv(5)
     print repr(head)
-    listhead= list(bytearray(head))
-    buftype =listhead[0]
-    #buftype =head.encode("hex")
+    buftype, = struct.unpack('B', head[0])
+    bufsize, = struct.unpack('I', head[1:])
+    #print 'buff size ' + str(bufsize)
     if buftype == 1:
-        envlen = readLEInt(head[1:], 4)
-        data = sock.recv(envlen)
-        print 'Received xml:'
-        print data
-    elif buftype == 3:
-        envlen = readLEInt(head[1:], 4)
-        data = sock.recv(envlen)
-        if IsSammay(data):
-            DecodeSam(data)
-        else:
-            #print repr(data)
-            writeToFile(data)
+        data = sock.recv(bufsize)
+        #print '\nReceived XML:'
+        #print data
+        writeToFile(cfgname, data)
 
-def writeToFile(buf):
-    target = open('0000000000', 'a+')
+def isReady(sock,filename):
+    head = sock.recv(5)
+    print repr(head)
+    buftype, = struct.unpack('B', head[0])
+    bufsize, = struct.unpack('I', head[1:])
+
+    if buftype == 3:
+        data = sock.recv(bufsize)
+        if isSummary(data):
+            decodeSummary(data)
+        writeToFile(filename, head)
+        writeToFile(filename, data)
+    return True
+
+def recv_Data(sock,filename):
+    data = sock.recv(4096)
+    writeToFile(filename, data)
+
+def writeToFile(name, buf):
+    target = open(name, 'a+')
     target.write(buf)
     target.close()
 
-def readLEInt(inbytes,size):
-    result = 0
-    for count in range(0, size-1):
-        cur = ord(inbytes[count])
-        result |= (cur & 0xff) << (count * 8)
-
-    return result
-
+def removeFile(name):
+    if(os.path.exists(name)):
+        return os.remove(name)
 
 def readString(inbytes,size):
     result = ''.join(cur for cur in inbytes[:size])
@@ -99,7 +105,7 @@ def readString(inbytes,size):
 
 def readBytes(inbytes,size):
     result = 0
-    for count in range(0,size):
+    for count in range(0, size):
         cur = ord(inbytes[count])
         result |= (cur & 0xff) << (count * 8)
 
@@ -139,51 +145,53 @@ def unpackInt64(inbytes):
             result |= signBits
     return count, result
 
-def IsSammay(sambuf):
-    if sambuf[1] == 1 and sambuf[2] == 1:
+def isSummary(sumbuf):
+    sumType, = struct.unpack('B', sumbuf[0])
+    sumCode, = struct.unpack('B', sumbuf[1])
+    if sumType == 1 and sumCode == 1:
         return True
     else:
         return False
 
-def DecodeSam(sambuf):
+def decodeSummary(sumbuf):
     mPos=0
 
-    Bytes, mValue = unpackInt(sambuf[mPos:])
+    Bytes, mValue = unpackInt(sumbuf[mPos:])
     mPos += Bytes
     print "Frame Type: " + str(mValue)
 
-    Bytes, mValue = unpackInt(sambuf[mPos:])
+    Bytes, mValue = unpackInt(sumbuf[mPos:])
     mPos += Bytes
     print "Code: " + str(mValue)
 
-    Bytes, mValue = unpackInt(sambuf[mPos:])
+    Bytes, mValue = unpackInt(sumbuf[mPos:])
     mPos += Bytes
     strLen = mValue
     #print "Canary Size: " + str(mValue)
 
-    Bytes, mValue = readString(sambuf[mPos:], strLen)
+    Bytes, mValue = readString(sumbuf[mPos:], strLen)
     mPos += Bytes
     print "Canary is:" + mValue
 
-    Bytes, mValue = unpackInt64(sambuf[mPos:])
+    Bytes, mValue = unpackInt64(sumbuf[mPos:])
     mPos += Bytes
     print "Timestamp is:" + str(mValue)
 
-    Bytes, mValue = unpackInt64(sambuf[mPos:])
+    Bytes, mValue = unpackInt64(sumbuf[mPos:])
     mPos += Bytes
     print "Uptime is:" + str(mValue)
 
-    Bytes, mValue = unpackInt64(sambuf[mPos:])
+    Bytes, mValue = unpackInt64(sumbuf[mPos:])
     mPos += Bytes
     print "Delta is:" + str(mValue)
 
     while True:
-        Bytes, mValue = unpackInt(sambuf[mPos:])
+        Bytes, mValue = unpackInt(sumbuf[mPos:])
         mPos += Bytes
         strLen = mValue
         #print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes) + " Bytes, Current pos is " + str(mPos)
 
-        Bytes, mValue = readString(sambuf[mPos:], strLen)
+        Bytes, mValue = readString(sumbuf[mPos:], strLen)
         mPos += Bytes
         #print "str1 is:" + mValue + "\nRead "+str(Bytes) + " Bytes, Current pos is " + str(mPos)
         print mValue
@@ -192,5 +200,5 @@ def DecodeSam(sambuf):
             break
 
 if __name__ == '__main__':
-    DecodeSam(sammary)
+    decodeSummary(summary)
 
