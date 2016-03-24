@@ -19,7 +19,7 @@ def handler(signum, frame):
      print "Signal %d, Active = %d"%(signum, Active)
 
 def prepare():
-    #Clear old file
+    # Clear old file
     parser.removeFile(pacfile)
     parser.removeFile(capxml)
     parser.removeFile(eventxml)
@@ -30,7 +30,7 @@ def canStop():
     signal.signal(signal.SIGTERM, handler)
 
 if __name__ == "__main__":
-    #init
+    # init
     prepare()
 
     # Create a TCP/IP socket
@@ -38,16 +38,16 @@ if __name__ == "__main__":
     server_address = ('localhost', 8084)
     sock.connect(server_address)
 
-    #Check
+    # Check
     sock.send('VERSION 23\n')
     sock.send('STREAMLINE\n')
     data = sock.recv(10)
     print 'Received', repr(data)
 
-    #Config Gator
-    #Session Setting
+    # Config Gator
+    # Session Setting
     print 'Config SessionXML'
-    xmlbytes = bytearray([1, 104, 1, 0, 0,                      #haeder
+    xmlbytes = bytearray([1, 104, 1, 0, 0,  # HEAD
     60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
     46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
     70,45,56,34,63,62,10,60,115,101,115,115,105,111,110,32,
@@ -71,13 +71,13 @@ if __name__ == "__main__":
     114,61,34,121,101,115,34,47,62,10,9,60,47,101,110,101,
     114,103,121,95,99,97,112,116,117,114,101,62,10,60,47,115,
     101,115,115,105,111,110,62,10])
-    sock.send(xmlbytes)#send command
+    sock.send(xmlbytes)     # Send command
     time.sleep(1)
     parser.recv_XML(sock, '')
 
-    #Get Captured setting info
+    # Get Captured setting info
     print 'Request Send Captured xml'
-    xmlbytes = bytearray([0,66,0,0,0,#HEAD
+    xmlbytes = bytearray([0,66,0,0,0,   # HEAD
     60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
     46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
     70,45,56,34,63,62,10,60,114,101,113,117,101,115,116,32,
@@ -87,9 +87,9 @@ if __name__ == "__main__":
     time.sleep(1)
     parser.recv_XML(sock, capxml)
 
-    #Get Events setting info
+    # Get Events setting info
     print 'Request Send Events config xml'
-    xmlbytes = bytearray([0,64,0,0,0,#HEAD
+    xmlbytes = bytearray([0,64,0,0,0,   # HEAD
     60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
     46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
     70,45,56,34,63,62,10,60,114,101,113,117,101,115,116,32,
@@ -98,44 +98,44 @@ if __name__ == "__main__":
     time.sleep(1)
     parser.recv_XML(sock, eventxml)
 
-    #Get Counters setting info
+    # Get Counters setting info
     print 'Request Send Counters xml'
-    xmlbytes = bytearray([0,66,0,0,0,#HEAD
+    xmlbytes = bytearray([0,66,0,0,0,   # HEAD
     60,63,120,109,108,32,118,101,114,115,105,111,110,61,34,49,
     46,48,34,32,101,110,99,111,100,105,110,103,61,34,85,84,
     70,45,56,34,63,62,10,60,114,101,113,117,101,115,116,32,
     116,121,112,101,61,34,99,111,117,110,116,101,114,115,34,47,
     62,10])
     sock.send(xmlbytes)
-    #Have much more data need send
-    #from phone,so sleep 2 sec.
+    # Have much more data need send
+    # from phone,so sleep 2 sec.
     time.sleep(2)
     parser.recv_XML(sock, counterxml)
 
-    ##Start
+    # Start
     print 'Start Capture'
     xmlbytes = bytearray([
     2,0,0,0,0,])
     sock.send(xmlbytes)
     time.sleep(1)
 
-    #Recveiv
+    # Receive
     Active = parser.isReady(sock, pacfile)
-    canStop()#CTRL+C CTRL+D
+    canStop()   # CTRL+C CTRL+D
 
     ################################################
-    ###                 Main Loop
+    #                 Main Loop
     ################################################
     while Active:
         parser.recv_Data(sock, pacfile)
 
-    ##Stop
+    # Stop
     print 'Start Stop'
     xmlbytes = bytearray([
     3,0,0,0,0,])
     sock.send(xmlbytes)
 
-    #After Stop still have some apc
+    # After Stop still have some apc
     parser.recv_Data(sock, pacfile)
 
     time.sleep(5)
