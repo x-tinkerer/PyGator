@@ -1,10 +1,17 @@
 import os
 import struct
 
-class UnPack:
+
+class Parser:
+
     def __init__(self, data, pos):
+        """
+
+        :type pos: object
+        """
         self.buf = data
         self.cur = pos
+
 
 """
     /**
@@ -32,19 +39,21 @@ class UnPack:
     }
 """
 
-def recv_XML(sock,cfgname):
+
+def recv_XML(sock, cfgname):
     head = sock.recv(5)
     print repr(head)
     buftype, = struct.unpack('B', head[0])
     bufsize, = struct.unpack('I', head[1:])
-    #print 'buff size ' + str(bufsize)
+    # print 'buff size ' + str(bufsize)
     if buftype == 1:
         data = sock.recv(bufsize)
-        #print '\nReceived XML:'
-        #print data
+        # print '\nReceived XML:'
+        # print data
         writeToFile(cfgname, data)
 
-def isReady(sock,filename):
+
+def isReady(sock, filename):
     head = sock.recv(5)
     print repr(head)
     buftype, = struct.unpack('B', head[0])
@@ -58,30 +67,36 @@ def isReady(sock,filename):
         writeToFile(filename, data)
     return True
 
-def recv_Data(sock,filename):
+
+def recv_Data(sock, filename):
     data = sock.recv(4096)
     writeToFile(filename, data)
+
 
 def writeToFile(name, buf):
     target = open(name, 'a+')
     target.write(buf)
     target.close()
 
+
 def removeFile(name):
-    if(os.path.exists(name)):
+    if (os.path.exists(name)):
         return os.remove(name)
 
-def readString(inbytes,size):
+
+def readString(inbytes, size):
     result = ''.join(cur for cur in inbytes[:size])
     return size, result
 
-def readBytes(inbytes,size):
+
+def readBytes(inbytes, size):
     result = 0
     for count in range(0, size):
         cur = ord(inbytes[count])
         result |= (cur & 0xff) << (count * 8)
 
     return size, result
+
 
 def unpackInt(inbytes):
     result = 0
@@ -100,6 +115,7 @@ def unpackInt(inbytes):
         result |= signBits
     return count, result
 
+
 def unpackInt64(inbytes):
     result = 0
     count = 0
@@ -114,8 +130,9 @@ def unpackInt64(inbytes):
             more = False;
 
     if (signBits >> 1) & result != 0:
-            result |= signBits
+        result |= signBits
     return count, result
+
 
 def isSummary(sumbuf):
     sumType, = struct.unpack('B', sumbuf[0])
@@ -125,8 +142,9 @@ def isSummary(sumbuf):
     else:
         return False
 
+
 def decodeSummary(sumbuf):
-    mPos=0
+    mPos = 0
 
     Bytes, mValue = unpackInt(sumbuf[mPos:])
     mPos += Bytes
@@ -139,7 +157,7 @@ def decodeSummary(sumbuf):
     Bytes, mValue = unpackInt(sumbuf[mPos:])
     mPos += Bytes
     strLen = mValue
-    #print "Canary Size: " + str(mValue)
+    # print "Canary Size: " + str(mValue)
 
     Bytes, mValue = readString(sumbuf[mPos:], strLen)
     mPos += Bytes
@@ -161,14 +179,14 @@ def decodeSummary(sumbuf):
         Bytes, mValue = unpackInt(sumbuf[mPos:])
         mPos += Bytes
         strLen = mValue
-        #print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes) + " Bytes, Current pos is " + str(mPos)
+        # print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes)
+        #  +" Bytes, Current pos is " + str(mPos)
 
         Bytes, mValue = readString(sumbuf[mPos:], strLen)
         mPos += Bytes
-        #print "str1 is:" + mValue + "\nRead "+str(Bytes) + " Bytes, Current pos is " + str(mPos)
+        # print "str1 is:" + mValue + "\nRead "+str(Bytes)
+        # + " Bytes, Current pos is " + str(mPos)
         print mValue
 
-        if mValue =='' :
+        if mValue == '':
             break
-
-
