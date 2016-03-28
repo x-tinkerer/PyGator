@@ -1,7 +1,8 @@
 import socket
 import time
 import parser
-import threading, signal
+import threading
+import signal
 
 pacfile = '0000000000'
 capxml = 'captured.xml'
@@ -18,7 +19,6 @@ def handler(signum, frame):
     global Active
     Active = False
     print "Signal %d, Active = %d" % (signum, Active)
-
 
 def prepare():
     # Clear old file
