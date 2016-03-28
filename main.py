@@ -1,4 +1,4 @@
-import socket
+
 import time
 import parser
 import threading
@@ -36,11 +36,6 @@ def canStop():
 if __name__ == "__main__":
     # init
     prepare()
-
-    # Create a TCP/IP socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = ('localhost', 8084)
-    sock.connect(server_address)
 
     # Check
     sock.send('VERSION 23\n')

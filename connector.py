@@ -1,3 +1,5 @@
+import socket
+
 class Connector(object):
     """Receive data for phone and then
     1. save pac as file
@@ -9,23 +11,26 @@ class Connector(object):
     """
     __PORT = 8084
     __HOST = 'localhost'
+    sock = None
 
     def __init__(self, port=8084, host='localhost'):
-        """Inits SampleClass with blah."""
-        self.__PORT = port
         self.__HOST = host
+        self.__PORT = port
 
-    def prepare(self):
-        """Performs operation blah."""
+    def start(self):
+        """Create a TCP/IP socket."""
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = (self.__HOST, self.__PORT)
+        self.sock.connect(server_address)
 
-    def recv_buff(self):
-        """Performs operation blah."""
+    def stop(self):
+        """Stop and close socket."""
+        self.sock.close()
 
-    def send_buff(self):
-        """Performs operation blah."""
+    def recv_buff(self, buff, size):
+        """Recevie data to buff."""
+        self.sock.recv(buff, size)
 
-    def read_file(self):
-        """Performs operation blah."""
-
-    def write_file(self):
-        """Performs operation blah."""
+    def send_buff(self, buff):
+        """Send buff to gatord"""
+        self.sock.recv(buff)
