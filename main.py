@@ -134,7 +134,7 @@ if __name__ == "__main__":
         parser.recv_Data(sock, pacfile)
 
     # Stop
-    print 'Start Stop'
+    print 'Stop Capture'
     xmlbytes = bytearray([
         3, 0, 0, 0, 0, ])
     sock.send(xmlbytes)
