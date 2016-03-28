@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1" call_stack_unwinding="yes" parse_debug_info="yes" high_resolution="no" buffer_mode="streaming" sample_rate="normal" duration="0" target_address="adb:80QBDNC22226" live_rate="100">
+	<energy_capture version="1" type="none">
+		<channel id="0" resistance="20" power="yes"/>
+	</energy_capture>
+</session>
