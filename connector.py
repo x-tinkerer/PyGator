@@ -6,31 +6,36 @@ class Connector(object):
     2. pass data to parser to analyses buff.
 
     Attributes:
-        likes_spam: A boolean indicating if we like SPAM or not.
-        eggs: An integer count of the eggs we have laid.
+
     """
     __PORT = 8084
     __HOST = 'localhost'
     sock = None
 
-    def __init__(self, port=8084, host='localhost'):
+    def __init__(self, host='localhost', port=8084):
         self.__HOST = host
         self.__PORT = port
 
-    def start(self):
+    def connect(self):
         """Create a TCP/IP socket."""
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (self.__HOST, self.__PORT)
         self.sock.connect(server_address)
+        # Check gatord version
+        self.sock.send('VERSION 23\n')
+        self.sock.send('STREAMLINE\n')
+        tmpbuf = self.sock.recv(10)
+        print 'Received', repr(tmpbuf)
 
-    def stop(self):
+    def disconnect(self):
         """Stop and close socket."""
         self.sock.close()
 
     def recv_buff(self, buff, size):
-        """Recevie data to buff."""
+        """Receive data to buff."""
         self.sock.recv(buff, size)
 
     def send_buff(self, buff):
         """Send buff to gatord"""
         self.sock.recv(buff)
+

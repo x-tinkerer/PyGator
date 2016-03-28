@@ -39,20 +39,6 @@ class Parser:
     }
 """
 
-
-def recv_XML(sock, cfgname):
-    head = sock.recv(5)
-    print repr(head)
-    buftype, = struct.unpack('B', head[0])
-    bufsize, = struct.unpack('I', head[1:])
-    # print 'buff size ' + str(bufsize)
-    if buftype == 1:
-        data = sock.recv(bufsize)
-        # print '\nReceived XML:'
-        # print data
-        writeToFile(cfgname, data)
-
-
 def isReady(sock, filename):
     head = sock.recv(5)
     print repr(head)
@@ -68,21 +54,8 @@ def isReady(sock, filename):
     return True
 
 
-def recv_Data(sock, filename):
-    data = sock.recv(4096)
-    writeToFile(filename, data)
-
-
-def writeToFile(name, buf):
-    target = open(name, 'a+')
-    target.write(buf)
-    target.close()
-
-
-def removeFile(name):
-    if (os.path.exists(name)):
-        return os.remove(name)
-
+def recv_Data(sock, buff):
+    buff = sock.recv(4096)
 
 def readString(inbytes, size):
     result = ''.join(cur for cur in inbytes[:size])
