@@ -15,6 +15,9 @@ class Connector(object):
         self.__PORT = port
         self.__HOST = host
 
+    def prepare(self):
+        """Performs operation blah."""
+
     def recv_buff(self):
         """Performs operation blah."""
 
