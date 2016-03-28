@@ -1,9 +1,10 @@
 import os
-import parser
+import buffer
 
 class Apc(object):
     aname = None
     mCon = None
+    mBuf = None
 
     start_cmmd_buff = bytearray([2, 0, 0, 0, 0, ])
     stop_cmmd_buff = bytearray([3, 0, 0, 0, 0, ])
@@ -11,6 +12,7 @@ class Apc(object):
     def __init__(self, con, name):
         self.aname = name
         self.mCon = con
+        self.mBuf = buffer.Buffer(con)
 
     def clean(slef):
         if (os.path.exists(slef.aname)):

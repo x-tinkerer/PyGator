@@ -14,25 +14,6 @@ PORT = 8090
 
 Active = False
 
-
-def handler(signum, frame):
-    global Active
-    Active = False
-    print "Signal %d, Active = %d" % (signum, Active)
-
-def prepare():
-    # Clear old file
-    parser.removeFile(pacfile)
-    parser.removeFile(capxml)
-    parser.removeFile(eventxml)
-    parser.removeFile(counterxml)
-
-
-def canStop():
-    signal.signal(signal.SIGINT, handler)
-    signal.signal(signal.SIGTERM, handler)
-
-
 if __name__ == "__main__":
 
     # Start
