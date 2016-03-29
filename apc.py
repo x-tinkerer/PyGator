@@ -26,9 +26,8 @@ class Apc(object):
 
     def writeAPC(self, buffer):
         target = open(self.aName, 'a+')
-        bytes = target.write(buffer)
+        target.write(buffer)
         target.close()
-        return bytes
 
     def start(self):
         self.mCon.send_buff(self.start_cmmd_buff)
@@ -50,4 +49,4 @@ class Apc(object):
                 ret = self.writeAPC(self.mBuf.mData)
                 self.mBuf.mReady_Set(0)
                 # time.sleep(1)
-                print ("Wrtie %d Bytes to apc file." %(ret))
+                print "Wrtie Bytes to apc file."
