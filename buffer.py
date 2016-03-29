@@ -24,8 +24,8 @@ class Buffer(object):
     cur_buff = None
     mutex = None
 
-    def __init__(self, con, size=4 *1024 * 1024):
-        """Inits SampleClass with blah."""
+    def __init__(self, con, size=4 * 1024 * 1024):
+        """Inits Buffer with blah."""
         self.mCon = con
         self.mSize = size
         self.mPar = parser.Parser()
