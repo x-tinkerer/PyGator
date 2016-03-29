@@ -72,8 +72,13 @@ class Buffer(object):
         for i in range(0, 5):
             self.cur_head.append(self.mFifo.get())
         print repr(self.cur_head)
-        type, = struct.unpack('B', self.cur_head[0])
-        size, = struct.unpack('I', self.cur_head[1:])
+        type = self.cur_head[0]
+        s1 = self.cur_head[1]
+        s2 = self.cur_head[2] << 8
+        s3 = self.cur_head[3] << 16
+        s4 = self.cur_head[4] << 24
+
+        size = s1 | s2 | s3 | s4
         self.cur_buff_type = type
         self.cur_buff_size = size
         self.status = 1
