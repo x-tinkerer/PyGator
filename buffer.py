@@ -51,8 +51,9 @@ class Buffer(object):
             self.mData = self.mCon.recv_buff(self.mSize)
             rev_Bytes = len(self.mData)
             for index in range(0, rev_Bytes):
+                self.fifo_mutex.acquire()
                 self.mFifo.put(self.mData[index])
-
+                self.fifo_mutex.release()
             self.buf_mutex.release()
             self.mEvent.set()
 
