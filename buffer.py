@@ -15,14 +15,14 @@ class Buffer(object):
     mPar = None
     mData = None
     mFifo = None
-    mReady = False
+    mReady = 0
     mSize = 0
     fSize = 0
     mPos = 0
     mRecv_Thread = None
     mProc_Thread = None
     mActivy = False
-    mEvent = None
+    #mEvent = None
     status = 0
 
     cur_head = None
@@ -39,6 +39,7 @@ class Buffer(object):
         self.mPar = parser.Parser(self.cur_buff)
         self.mFifo = Queue.Queue(fsize)
         self.fSize = fsize
+        self.mReady = 0
         self.buf_mutex = threading.Lock()
         self.fifo_mutex = threading.Lock()
         self.mRecv_Thread = threading.Thread(target=self.receive_main, args=())
@@ -46,16 +47,17 @@ class Buffer(object):
 
     def receive_main(self):
         while self.mActivy:
-            self.buf_mutex.acquire()
-            # Receive Data
-            self.mData = self.mCon.recv_buff(self.mSize)
-            rev_Bytes = len(self.mData)
-            for index in range(0, rev_Bytes):
+            if self.mReady == 0:
+                self.buf_mutex.acquire()
+                # Receive Data
+                self.mData = self.mCon.recv_buff(self.mSize)
+                rev_Bytes = len(self.mData)
                 self.fifo_mutex.acquire()
-                self.mFifo.put(self.mData[index])
+                for index in range(0, rev_Bytes):
+                    self.mFifo.put(self.mData[index])
+                self.mReady = 1
                 self.fifo_mutex.release()
-            self.buf_mutex.release()
-            self.mEvent.set()
+                self.buf_mutex.release()
 
     def process_main(self):
         while self.mActivy:
@@ -96,9 +98,9 @@ class Buffer(object):
         # TODO: Parse and Collect.
         # self.mPar.isSummary(self.cur_buff)
 
-    def notify_set(self, event):
+    def mReady_Set(self, ready):
         """Performs operation blah."""
-        self.mEvent = event
+        self.mReady = ready
 
     def recv_buff(self):
         """Performs operation blah."""

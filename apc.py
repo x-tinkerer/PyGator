@@ -1,6 +1,7 @@
 import os
 import buffer
 import threading
+import time
 
 class Apc(object):
     aName = None
@@ -8,7 +9,6 @@ class Apc(object):
     mBuf = None
     mActivy = False
     mLock = None
-    mEvent = None
 
     start_cmmd_buff = bytearray([2, 0, 0, 0, 0, ])
     stop_cmmd_buff = bytearray([3, 0, 0, 0, 0, ])
@@ -18,7 +18,6 @@ class Apc(object):
         self.mCon = con
         self.mBuf = buffer.Buffer(con)
         self.mLock = threading.Lock()
-        self.mEvent = threading.Event()
         self.CB_Thread = threading.Thread(target=self.main_loop, args=())
 
     def clean(slef):
@@ -35,8 +34,8 @@ class Apc(object):
         self.mCon.send_buff(self.start_cmmd_buff)
         self.mActivy = True
         self.CB_Thread.start()
+        time.sleep(1)
         self.mBuf.change_Activy(self.mActivy)
-        self.mBuf.notify_set(self.mEvent)
         self.mBuf.main_loop()
 
     def stop(self):
@@ -46,8 +45,9 @@ class Apc(object):
         self.mActivy = act
 
     def main_loop(self):
-        self.mEvent.wait()
-        if self.mBuf.mReady:
-            ret = self.writeAPC(self.mBuf.mData)
-            self.mEvent.clear()
-            # print ("Wrtie %d Bytes to apc file." %(ret))
+        while self.mActivy:
+            if self.mBuf.mReady:
+                ret = self.writeAPC(self.mBuf.mData)
+                self.mBuf.mReady_Set(0)
+                # time.sleep(1)
+                print ("Wrtie %d Bytes to apc file." %(ret))
