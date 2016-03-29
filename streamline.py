@@ -1,6 +1,5 @@
 import connector
 import buffer
-import parser
 import xml
 import apc
 
@@ -21,13 +20,13 @@ class Streamline(object):
     mAPC = None
 
     def __init__(self):
-        mCon = connector.Connector('localhost', 8084)
-        mBuf = buffer.Buffer(4 * 1000 * 1000)  # 4M Size
-        eventsXML = xml.EventXML(mCon)
-        countersXML = xml.CountersXML(mCon)
-        capturedXML = xml.CapturedXML(mCon)
-        sessionXML = xml.SessionXML(mCon)
-        mAPC = apc.Apc('0000000000')
+        self.mCon = connector.Connector('localhost', 8084)
+        self.mBuf = buffer.Buffer(4 * 1000 * 1000)  # 4M Size
+        self.eventsXML = xml.EventXML(self.mCon)
+        self.countersXML = xml.CountersXML(self.mCon)
+        self.capturedXML = xml.CapturedXML(self.mCon)
+        self.sessionXML = xml.SessionXML(self.mCon)
+        self.mAPC = apc.Apc('0000000000')
 
     def prepare_xml(self):
         self.eventsXML.clean()
@@ -64,12 +63,12 @@ class Streamline(object):
 
     def start_record(self):
         self.mAPC.start()
-        #TODO
-        # RECORD BUFF
 
     def stop_record(self):
         self.mAPC.stop()
-        # TODO
-        # RECORD BUFF
+
+    def main_loop(self):
+        self.mAPC.main_loop()
+
 
 

@@ -11,10 +11,12 @@ if __name__ == "__main__":
     sl.config()
     # 4. Start
     print 'Start Capture'
+    sl.start_record()
+
     ################################################
     #                 Main Loop
     ################################################
-    sl.start_record()
+    sl.main_loop()
 
     # 5. Stop
     print 'Stop Capture'
