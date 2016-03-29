@@ -19,7 +19,7 @@ class Apc(object):
         self.mBuf = buffer.Buffer(con)
         self.mLock = threading.Lock()
         self.mEvent = threading.Event()
-        self.CB_Thread = threading.Thread(target=self.main_loop, args=(10,))
+        self.CB_Thread = threading.Thread(target=self.main_loop, args=())
 
     def clean(slef):
         if (os.path.exists(slef.aName)):
@@ -32,13 +32,15 @@ class Apc(object):
         return bytes
 
     def start(self):
-        self.mCon.send_buf(self.start_cmmd_buff)
+        self.mCon.send_buff(self.start_cmmd_buff)
         self.mActivy = True
-        self.mBuf.main_loop()
         self.CB_Thread.start()
+        self.mBuf.change_Activy(self.mActivy)
+        self.mBuf.notify_set(self.mEvent)
+        self.mBuf.main_loop()
 
     def stop(self):
-        self.mCon.send_buf(self.stop_cmmd_buff)
+        self.mCon.send_buff(self.stop_cmmd_buff)
 
     def change_Activy(self, act):
         self.mActivy = act
@@ -47,4 +49,5 @@ class Apc(object):
         self.mEvent.wait()
         if self.mBuf.mReady:
             ret = self.writeAPC(self.mBuf.mData)
+            self.mEvent.clear()
             # print ("Wrtie %d Bytes to apc file." %(ret))

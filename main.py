@@ -1,6 +1,5 @@
 import streamline
 
-
 if __name__ == "__main__":
     sl = streamline.Streamline()
     # 1. Prepare
@@ -20,5 +19,5 @@ if __name__ == "__main__":
 
     # 5. Stop
     print 'Stop Capture'
-    sl.start_record()
+    sl.stop_record()
 

@@ -31,11 +31,12 @@ class Connector(object):
         """Stop and close socket."""
         self.sock.close()
 
-    def recv_buff(self, buff, size):
+    def recv_buff(self, size):
         """Receive data to buff."""
-        self.sock.recv(buff, size)
+        buff = self.sock.recv(size)
+        return buff
 
     def send_buff(self, buff):
         """Send buff to gatord"""
-        self.sock.recv(buff)
+        self.sock.send(buff)
 
