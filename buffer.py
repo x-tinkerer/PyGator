@@ -132,7 +132,7 @@ class Buffer(object):
             self.mPar.handleName()
         elif frame_type == 4:
             print 'Parse Counter...'
-            self.mPar.handleCounter()
+            self.mPar.handleCounter(self.cur_buff[1:])
         elif frame_type == 5:
             print 'Parse Block...'
             self.mPar.handleBlock()

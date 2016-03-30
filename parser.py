@@ -63,39 +63,39 @@ class Parser:
 
         bytes, Code = self.unpackInt(sumbuf[mPos:])
         mPos += bytes
-        print "Code: " + str(Code)
+        print 'Code: ' + str(Code)
 
         if Code == 1:
             bytes, strLen = self.unpackInt(sumbuf[mPos:])
             mPos += bytes
-            # print "Canary Size: " + str(mValue)
+            # print 'Canary Size: ' + str(mValue)
             bytes, mValue = self.readString(sumbuf[mPos:], strLen)
             mPos += bytes
-            print "Canary is:" + mValue
+            print 'Canary is:' + mValue
 
             bytes, Timestamp = self.unpackInt64(sumbuf[mPos:])
             mPos += bytes
-            print "Timestamp is:" + str(Timestamp)
+            print 'Timestamp is:' + str(Timestamp)
 
             bytes, Uptime = self.unpackInt64(sumbuf[mPos:])
             mPos += bytes
-            print "Uptime is:" + str(Uptime)
+            print 'Uptime is:' + str(Uptime)
 
             bytes, Delta = self.unpackInt64(sumbuf[mPos:])
             mPos += bytes
-            print "Delta is:" + str(Delta)
+            print 'Delta is:' + str(Delta)
 
             while True:
                 bytes, mValue = self.unpackInt(sumbuf[mPos:])
                 mPos += bytes
                 strLen = mValue
-                # print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes)
-                #  +" Bytes, Current pos is " + str(mPos)
+                # print 'str1 Size: ' + str(mValue) + '\nRead ' + str(Bytes)
+                #  +' Bytes, Current pos is ' + str(mPos)
 
                 bytes, mValue = self.readString(sumbuf[mPos:], strLen)
                 mPos += bytes
-                # print "str1 is:" + mValue + "\nRead "+str(Bytes)
-                # + " Bytes, Current pos is " + str(mPos)
+                # print 'str1 is:' + mValue + '\nRead '+str(Bytes)
+                # + ' Bytes, Current pos is ' + str(mPos)
                 print mValue
 
                 if mValue == '':
@@ -103,17 +103,17 @@ class Parser:
         elif Code == 3:
             bytes, Core = self.unpackInt(sumbuf[mPos:])
             mPos += bytes
-            print "Core:" + str(Core)
+            print 'Core:' + str(Core)
 
             bytes, cpuid = self.unpackInt(sumbuf[mPos:])
             mPos += bytes
-            print "cpuid:" + str(cpuid)
+            print 'cpuid:' + str(cpuid)
 
             bytes, strLen = self.unpackInt(sumbuf[mPos:])
             mPos += bytes
             bytes, Name = self.readString(sumbuf[mPos:], strLen)
             mPos += bytes
-            print "Name:" + Name
+            print 'Name:' + Name
 
 
     def handleBacktrace(self):
@@ -122,8 +122,35 @@ class Parser:
     def handleName(self):
         pass
 
-    def handleCounter(self):
-        pass
+    def handleCounter(self, inbuf):
+        """
+            Timestamp:
+            Core:	packed32	Core to which this counter applies
+            Key:	packed32	Key in Captured XML
+            Value:	packed64	Value of the specified counter
+        """
+        mPos = 0
+        mInfo = ''
+        bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
+        mPos += bytes
+        mInfo += 'Timestamp:' + str(Timestamp)
+        print 'Timestamp: ' + str(Timestamp)
+
+        bytes, Core = self.unpackInt64(inbuf[mPos:])
+        mPos += bytes
+        mInfo += 'Core: ' + str(Core)
+        print 'Core: ' + str(Core)
+
+        bytes, Key = self.unpackInt64(inbuf[mPos:])
+        mPos += bytes
+        print 'Key: ' + str(Key)
+        mInfo += 'Key: ' + str(Key)
+        bytes, Value = self.unpackInt64(inbuf[mPos:])
+        mPos += bytes
+        mInfo += 'Value: ' + str(Value)
+        print 'Value: ' + str(Value)
+
+        print mInfo
 
     def handleBlock(self):
         pass
