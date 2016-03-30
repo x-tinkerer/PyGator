@@ -6,14 +6,14 @@ class Parser:
         self.mBuf = buff
 
     def readString(self, inbytes, size):
-        result = ''.join(cur for cur in inbytes[:size])
+        result = ''.join(chr(cur) for cur in inbytes[:size])
         return size, result
 
 
     def readBytes(self, inbytes, size):
         result = 0
         for count in range(0, size):
-            cur = ord(inbytes[count])
+            cur = inbytes[count]
             result |= (cur & 0xff) << (count * 8)
 
         return size, result
@@ -25,7 +25,7 @@ class Parser:
         more = True
         signBits = -1
         while more:
-            cur = ord(inbytes[count])
+            cur = inbytes[count]
             result |= (cur & 0x7f) << (count * 7)
             signBits <<= 7
             count += 1
@@ -43,7 +43,7 @@ class Parser:
         more = True
         signBits = -1
         while more:
-            cur = ord(inbytes[count])
+            cur = inbytes[count]
             result |= (cur & 0x7f) << (count * 7)
             signBits <<= 7
             count += 1
@@ -54,59 +54,94 @@ class Parser:
             result |= signBits
         return count, result
 
-    def isSummary(self, sumbuf):
-        sumType, = struct.unpack('B', sumbuf[0])
-        sumCode, = struct.unpack('B', sumbuf[1])
-        if sumType == 1 and sumCode == 1:
-            return True
-        else:
-            return False
 
-
-    def decodeSummary(self, sumbuf):
+    """
+        Core:	packed32	ONLY Backtrace, Name, Block Counter, Scheduler Trace and Proc Frames;
+    """
+    def handleSummary(self, sumbuf):
         mPos = 0
 
-        Bytes, mValue = self.unpackInt(sumbuf[mPos:])
-        mPos += Bytes
-        print "Frame Type: " + str(mValue)
+        bytes, Code = self.unpackInt(sumbuf[mPos:])
+        mPos += bytes
+        print "Code: " + str(Code)
 
-        Bytes, mValue = self.unpackInt(sumbuf[mPos:])
-        mPos += Bytes
-        print "Code: " + str(mValue)
+        if Code == 1:
+            bytes, strLen = self.unpackInt(sumbuf[mPos:])
+            mPos += bytes
+            # print "Canary Size: " + str(mValue)
+            bytes, mValue = self.readString(sumbuf[mPos:], strLen)
+            mPos += bytes
+            print "Canary is:" + mValue
 
-        Bytes, mValue = self.unpackInt(sumbuf[mPos:])
-        mPos += Bytes
-        strLen = mValue
-        # print "Canary Size: " + str(mValue)
+            bytes, Timestamp = self.unpackInt64(sumbuf[mPos:])
+            mPos += bytes
+            print "Timestamp is:" + str(Timestamp)
 
-        Bytes, mValue = self.readString(sumbuf[mPos:], strLen)
-        mPos += Bytes
-        print "Canary is:" + mValue
+            bytes, Uptime = self.unpackInt64(sumbuf[mPos:])
+            mPos += bytes
+            print "Uptime is:" + str(Uptime)
 
-        Bytes, mValue = self.unpackInt64(sumbuf[mPos:])
-        mPos += Bytes
-        print "Timestamp is:" + str(mValue)
+            bytes, Delta = self.unpackInt64(sumbuf[mPos:])
+            mPos += bytes
+            print "Delta is:" + str(Delta)
 
-        Bytes, mValue = self.unpackInt64(sumbuf[mPos:])
-        mPos += Bytes
-        print "Uptime is:" + str(mValue)
+            while True:
+                bytes, mValue = self.unpackInt(sumbuf[mPos:])
+                mPos += bytes
+                strLen = mValue
+                # print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes)
+                #  +" Bytes, Current pos is " + str(mPos)
 
-        Bytes, mValue = self.unpackInt64(sumbuf[mPos:])
-        mPos += Bytes
-        print "Delta is:" + str(mValue)
+                bytes, mValue = self.readString(sumbuf[mPos:], strLen)
+                mPos += bytes
+                # print "str1 is:" + mValue + "\nRead "+str(Bytes)
+                # + " Bytes, Current pos is " + str(mPos)
+                print mValue
 
-        while True:
-            Bytes, mValue = self.unpackInt(sumbuf[mPos:])
-            mPos += Bytes
-            strLen = mValue
-            # print "str1 Size: " + str(mValue) + "\nRead " + str(Bytes)
-            #  +" Bytes, Current pos is " + str(mPos)
+                if mValue == '':
+                    break
+        elif Code == 3:
+            bytes, Core = self.unpackInt(sumbuf[mPos:])
+            mPos += bytes
+            print "Core:" + str(Core)
 
-            Bytes, mValue = self.readString(sumbuf[mPos:], strLen)
-            mPos += Bytes
-            # print "str1 is:" + mValue + "\nRead "+str(Bytes)
-            # + " Bytes, Current pos is " + str(mPos)
-            print mValue
+            bytes, cpuid = self.unpackInt(sumbuf[mPos:])
+            mPos += bytes
+            print "cpuid:" + str(cpuid)
 
-            if mValue == '':
-                break
+            bytes, strLen = self.unpackInt(sumbuf[mPos:])
+            mPos += bytes
+            bytes, Name = self.readString(sumbuf[mPos:], strLen)
+            mPos += bytes
+            print "Name:" + Name
+
+
+    def handleBacktrace(self):
+        pass
+
+    def handleName(self):
+        pass
+
+    def handleCounter(self):
+        pass
+
+    def handleBlock(self):
+        pass
+
+    def handleAnnotate(self):
+        pass
+
+    def handleScheduler(self):
+        pass
+
+    def  handleIdle(self):
+        pass
+
+    def handleExternal(self):
+        pass
+
+    def handleProc(self):
+        pass
+
+    def handleActivity(self):
+        pass
