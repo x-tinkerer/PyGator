@@ -81,7 +81,7 @@ class Buffer(object):
         self.cur_head = bytearray()
         for i in range(0, 5):
             self.cur_head.append(self.mFifo.get())
-        print repr(self.cur_head)
+        #print repr(self.cur_head)
         btype = self.cur_head[0]
         s1 = self.cur_head[1]
         s2 = self.cur_head[2] << 8

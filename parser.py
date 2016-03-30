@@ -1,9 +1,11 @@
-import struct
+import show
 
 class Parser:
     mBuf = None
+    cpufreqDisplay = None
     def __init__(self, buff):
         self.mBuf = buff
+        self.cpufreqDisplay = show.CpufreqDisplay(10)
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
@@ -134,23 +136,26 @@ class Parser:
         bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
         mPos += bytes
         mInfo += 'Timestamp:' + str(Timestamp)
-        print 'Timestamp: ' + str(Timestamp)
+        # print 'Timestamp: ' + str(Timestamp)
 
         bytes, Core = self.unpackInt64(inbuf[mPos:])
         mPos += bytes
-        mInfo += 'Core: ' + str(Core)
-        print 'Core: ' + str(Core)
+        mInfo += '  Core: ' + str(Core)
+        # print 'Core: ' + str(Core)
 
         bytes, Key = self.unpackInt64(inbuf[mPos:])
         mPos += bytes
-        print 'Key: ' + str(Key)
-        mInfo += 'Key: ' + str(Key)
+        # print 'Key: ' + str(Key)
+        mInfo += '  Key: ' + str(Key)
+
         bytes, Value = self.unpackInt64(inbuf[mPos:])
         mPos += bytes
-        mInfo += 'Value: ' + str(Value)
-        print 'Value: ' + str(Value)
+        mInfo += '  Value: ' + str(Value)
+        # print 'Value: ' + str(Value)
+        # print mInfo
 
-        print mInfo
+        if Key == 0x2D: #cpufreq
+            self.cpufreqDisplay.update(Core,Timestamp/1000000, Value/1000000)
 
     def handleBlock(self):
         pass

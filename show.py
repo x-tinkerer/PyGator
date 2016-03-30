@@ -1,75 +1,79 @@
-#coding=utf-8
-"""
-Bar chart demo with pairs of bars grouped for easy comparison.
-"""
 import numpy as np
 import matplotlib.pyplot as plt
-plt.rcParams['font.sans-serif'] = ['SimHei']
+import time
 
-n_groups = 6
+class Display(object):
+    mActivy = False
+    def update(self):
+        pass
 
-means_men = (20, 35, 30, 35, 27, 18)
-#std_men = (2, 3, 4, 1, 2)
+    def show(self):
+        pass
 
-means_women = (25, 32, 34, 20, 25, 18)
-#std_women = (3, 5, 2, 3, 3)
+    def setActivy(self, act):
+        self.mActivy = act
 
-fig, ax = plt.subplots()
+class CpufreqDisplay(Display):
+    maxRecord = 10000
+    cpuNum = 0
+    count = 0
 
-index = np.arange(n_groups)
-#bar_width = 0.35
-bar_width = 0.2
+    cpufreq = None
+    timeline = None
+    firsttime = 0
+    lasttime = 0
+    firstts = 0
+    lastts = 0
 
-opacity = 0.4
-error_config = {'ecolor': '0.3'}
+    def __init__(self, num):
+        self.cpuNum = num
+        self.count = 0
+        self.firsttime = time.time() * 1000
+        self.cpufreq = [[] for i in range(num)]
+        self.timeline = [[] for i in range(num)]
 
-rects1 = plt.bar(index, means_men, bar_width,
-                 alpha=opacity,
-                 color='b',
-                 #yerr=std_men,
-                 error_kw=error_config,
-                 label='Men')
+    def update(self, cpu, ts, value):
+        if self.firstts == 0:
+            self.firstts = ts
+            self.firsttime = time.time() * 1000
+        self.cpufreq[cpu].append(value)
+        self.timeline[cpu].append(ts)
+        # self.lasttime = time.time() * 1000 # ms
+        self.count += 1
 
-rects2 = plt.bar(index + bar_width, means_women, bar_width,
-                 alpha=opacity,
-                 color='r',
-                 #yerr=std_women,
-                 error_kw=error_config,
-                 label='Women')
+    def display(self, sleep):
+        while self.mActivy == True:
+            for cpu in range(self.cpuNum):
+                self.lasttime = time.time() * 1000 # ms
+                self.lastts = self.lasttime - self.firsttime + self.firstts
+                if self.count > 0:
+                    for index in range(self.count):
+                        if self.count == 1:
+                            l = plt.axhline(y=self.cpufreq[cpu][index], xmin=0, xmax=self.lastts)
+                        elif index == 0 :
+                            l = plt.axhline(y=self.cpufreq[cpu][index], xmin=0, xmax=self.cpufreq[cpu][0])
+                        elif index == self.count-1 and self.lastts - self.timeline[cpu][index] > 10: # >10ms
+                            l = plt.axhline(y=self.cpufreq[cpu][index], xmin=self.timeline[cpu][index],
+                                            xmax=self.lastts)
+                        else:
+                            l = plt.axhline(y=self.cpufreq[cpu][index], xmin=self.timeline[cpu][index],
+                                            xmax=self.timeline[cpu][index + 1])
+                if(self.lastts > 50 * 1000):
+                    plt.axis([0, 2500, self.lastts - 50 * 1000, self.lastts])
+                else:
+                    plt.axis([0, 2500, 0, 50 * 1000])
+                plt.show()
 
-rects3 = plt.bar(index+bar_width*2, means_men, bar_width,
-                 alpha=opacity,
-                 color='b',
-                 #yerr=std_men,
-                 error_kw=error_config,
-                 label='Men')
-
-rects4 = plt.bar(index+bar_width*3, means_men, bar_width,
-                 alpha=opacity,
-                 color='g',
-                 #yerr=std_men,
-                 error_kw=error_config,
-                 label='Men')
-
-def autolabel(rects):
-    # attach some text labels
-    for rect in rects:
-        height = rect.get_height()
-        ax.text(rect.get_x()+rect.get_width()/2.0, 1.05*height,
-                '%d'%int(height), ha='center', va='bottom')
-autolabel(rects1)
-autolabel(rects2)
-autolabel(rects3)
-autolabel(rects4)
+            time.sleep(sleep)
 
 
-plt.xlabel(u'Title')
-plt.ylabel(u'Num')
-plt.title(u'AVG')
-plt.xticks(index + bar_width, ('1', '2', '3', '4', '5', '6'))
-#plt.legend()
-ax.set_ybound(0, 40)
+def demo():
 
-plt.tight_layout()
-plt.show()
-#plt.savefig(u't.png')
+    l = plt.axhline(y=.5, xmin=0.25, xmax=0.75)
+
+    plt.axis([-1, 2, -1, 2])
+
+    plt.show()
+
+if __name__ == "__main__":
+    demo()
