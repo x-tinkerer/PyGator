@@ -1,4 +1,5 @@
 import socket
+import traceback
 
 class Connector(object):
     """Receive data for phone and then
@@ -33,8 +34,13 @@ class Connector(object):
 
     def recv_buff(self, size):
         """Receive data to buff."""
-        buff = self.sock.recv(size)
-        return buff
+        while True:
+            try:
+                buff = self.sock.recv(size)
+                return buff
+            except:
+                traceback.print_exc()
+                break
 
     def send_buff(self, buff):
         """Send buff to gatord"""

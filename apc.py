@@ -18,7 +18,8 @@ class Apc(object):
         self.mCon = con
         self.mBuf = buffer.Buffer(con)
         self.mLock = threading.Lock()
-        self.CB_Thread = threading.Thread(target=self.main_loop, args=())
+        self.writer = threading.Thread(target=self.main_loop, args=(), name='gt-writer')
+        self.terminator = threading.Thread(target=self.terminator, args=(50,), name='gt-termin')
 
     def clean(slef):
         if (os.path.exists(slef.aName)):
@@ -32,21 +33,32 @@ class Apc(object):
     def start(self):
         self.mCon.send_buff(self.start_cmmd_buff)
         self.mActivy = True
-        self.CB_Thread.start()
+        self.writer.start()
+        self.terminator.start()
         time.sleep(1)
-        self.mBuf.change_Activy(self.mActivy)
+        self.mBuf.setActivy(self.mActivy)
         self.mBuf.main_loop()
 
     def stop(self):
         self.mCon.send_buff(self.stop_cmmd_buff)
 
-    def change_Activy(self, act):
+    def setActivy(self, act):
         self.mActivy = act
 
     def main_loop(self):
         while self.mActivy:
             if self.mBuf.mReady:
                 ret = self.writeAPC(self.mBuf.mData)
-                self.mBuf.mReady_Set(0)
+                self.mBuf.setmReady(0)
                 # time.sleep(1)
                 print "Wrtie Bytes to apc file."
+            else:
+                time.sleep(0.1)
+
+    def terminator(self, interval):
+        while interval:
+          time.sleep(1)
+          interval -= 1
+
+        self.mActivy = False
+        self.mBuf.setActivy(self.mActivy)

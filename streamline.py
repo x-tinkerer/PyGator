@@ -22,7 +22,7 @@ class Streamline(object):
 
     def __init__(self):
         self.mCon = connector.Connector('localhost', 8084)
-        self.mBuf = buffer.Buffer(4 * 1000 * 1000)  # 4M Size
+        self.mBuf = buffer.Buffer(self.mCon)  # 4M Size
         self.eventsXML = xml.EventsXML(self.mCon)
         self.countersXML = xml.CountersXML(self.mCon)
         self.capturedXML = xml.CapturedXML(self.mCon)
@@ -50,12 +50,11 @@ class Streamline(object):
         self.mCon.disconnent()
 
     def config_xml(self):
-        #self.sessionXML.send_comm()
+        self.sessionXML.send_comm()
         # self.sessionXML.readXML()
-        #self.sessionXML.send_body()
-        #time.sleep(1)
-
-        #self.sessionXML.recv_response()
+        self.sessionXML.send_body()
+        time.sleep(1)
+        self.sessionXML.recv_response()
 
         self.capturedXML.send_comm()
         time.sleep(1)
