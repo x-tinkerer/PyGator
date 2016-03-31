@@ -1,32 +1,18 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import time
-import threading
+import matplotlib.pyplot as plt
 from matplotlib import animation
 
-class Display(object):
-    mActivy = False
-    def update(self):
-        pass
-
-    def show(self):
-        pass
-
-    def setActivy(self, act):
-        self.mActivy = act
-
-
-cpuNum = 0
-count = None
-cpufreq = None
-linefreq = None
-timeline = None
-firsttime = 0
-lasttime = 0
+global cpuNum
+global count
+global cpufreq
+global linefreq
+global timeline
+global firsttime
+global lasttime
 firstts = 0
-lastts = 0
+global lastts
 
-def setup(num):
+def setupShow(num):
     global cpuNum
     global count
     global firsttime
@@ -34,15 +20,15 @@ def setup(num):
     global cpufreq
     global timeline
     global fig
+    global linefreq
 
     cpuNum = num
-    count = 0
     firsttime = time.time() * 1000
-    count = [[0] for i in range(num)]
+    count = [0 for x in range(10)]
+    linefreq = []
+    firstts = 0
     cpufreq = [[] for i in range(num)]
     timeline = [[] for i in range(num)]
-    linefreq = [] * 10
-    fig = plt.figure()
 
 def update(cpu, ts, value):
     global firstts
@@ -57,52 +43,11 @@ def update(cpu, ts, value):
     cpufreq[cpu].append(value)
     timeline[cpu].append(ts)
     # self.lasttime = time.time() * 1000 # ms
-    count[cpu][0] += 1
+    count[cpu] += 1
 
-def start():
-    # self.cpufreqth.setDaemon()
-    # self.cpufreqth.start()
-    setup(10)
+def startShow():
+    setupShow(10)
     load_show()
-
-"""
-def display(self, interval):
-    while self.mActivy == True:
-        for cpu in range(self.cpuNum):
-            lasttime = time.time() * 1000 # ms
-            lastts = lasttime - firsttime + firstts
-            if self.count > 0:
-                for index in range(self.count):
-                    if self.count == 1:
-                        l = plt.axhline(y=self.cpufreq[cpu][index], xmin=0, xmax=self.lastts)
-                    elif index == 0 :
-                        l = plt.axhline(y=self.cpufreq[cpu][index], xmin=0, xmax=self.cpufreq[cpu][0])
-                    elif index == self.count-1 and self.lastts - self.timeline[cpu][index] > 10: # >10ms
-                        l = plt.axhline(y=self.cpufreq[cpu][index], xmin=self.timeline[cpu][index],
-                                        xmax=self.lastts)
-                    else:
-                        l = plt.axhline(y=self.cpufreq[cpu][index], xmin=self.timeline[cpu][index],
-                                        xmax=self.timeline[cpu][index + 1])
-            if(self.lastts > 50 * 1000):
-                plt.axis([0, 2500, lastts - 50 * 1000, lastts])
-            else:
-                plt.axis([0, 2500, 0, 50 * 1000])
-            plt.show()
-
-        time.sleep(interval)
-"""
-
-def init():
-    num = cpuNum
-    ax = []
-    global linefreq
-    for cpu in range(num):
-        ax.append(fig.add_subplot(num, 1, 1, xlim=(0, 50000), ylim=(0, 2500)))
-        linefreq[cpu], = ax[cpu].plot([], [], lw=1)
-        linefreq[cpu].set_data([], [])
-
-    return linefreq
-
 
 def cut_show_point(start_t, end_t, pointx, pointy):
     tmpx = []
@@ -123,14 +68,16 @@ def make_point(cpu):
     pointy = []
     global lasttime
     global lastts
+    global firstts
     global count
     global cpufreq
     global timeline
+    global firsttime
 
     lasttime = time.time() * 1000  # ms
     lastts = lasttime - firsttime + firstts
 
-    for i in range(count[cpu][0]):
+    for i in range(count[cpu]):
         if count[cpu] > 0:
             if i == 0:
                 pointx.append(timeline[cpu][0])
@@ -138,7 +85,7 @@ def make_point(cpu):
 
                 pointx.append(timeline[cpu][0])
                 pointy.append(cpufreq[cpu][0])
-            elif i == count[cpu][0] - 1:
+            elif i == count[cpu] - 1:
                 pointx.append(timeline[cpu][i])
                 pointy.append(cpufreq[cpu][i])
 
@@ -153,34 +100,29 @@ def make_point(cpu):
 
     return pointx, pointy
 
-def animate():
-    num = cpuNum
+fig = plt.figure()
+ax1 = fig.add_subplot(2, 1, 1, xlim=(0, 50000), ylim=(0, 2500))
+ax2 = fig.add_subplot(2, 1, 2, xlim=(0, 50000), ylim=(0, 2500))
 
-    global lasttime
-    global lastts
-    global count
-    global cpufreq
-    global timeline
-    global linefreq
-    cpointx = []
-    cpointy = []
-    x = range(50 * 1000)
-    for cpu in range(num):
-        time, freq = make_point(cpu)
-        if len(time) > 0:
-            cpointx, cpointy = cut_show_point(lastts - 50 * 1000, lastts, time, freq)
-        linefreq[cpu].set_data(cpointx, cpointy)
+load_sum_l, = ax1.plot([], [], lw=1)
+load_sum_b, = ax2.plot([], [], lw=1)
 
-    return linefreq
+
+def init():
+    load_sum_l.set_data([], [])
+    load_sum_b.set_data([], [])
+
+    return load_sum_l, load_sum_b
+
+def animate(cpu):
+    load_sum_l.set_data([0, 3000, 3000, 15000], [500,500,800,800])
+    load_sum_b.set_data([0, 3000, 3000, 15000], [500,500,800,800])
+    return load_sum_l, load_sum_b
 
 def load_show():
-    am = animation.FuncAnimation(fig, animate(), init_func=init, frames=50, interval=1 / 100)
+    am = animation.FuncAnimation(fig, animate, init_func=init, frames=30, interval=10)
     plt.show()
 
-def demo():
-    l = plt.axhline(y=.5, xmin=0.25, xmax=0.75)
-    plt.axis([-1, 2, -1, 2])
-    plt.show()
 
 if __name__ == "__main__":
-    demo()
+    load_show()

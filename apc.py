@@ -43,7 +43,7 @@ class Apc(object):
         #self.mcpufreq.setActivy(self.mActivy)
         self.mBuf.main_loop()
         #self.mcpufreq.start()
-        show.start()
+        show.startShow()
 
     def stop(self):
         self.mCon.send_buff(self.stop_cmmd_buff)
