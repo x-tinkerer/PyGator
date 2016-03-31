@@ -23,7 +23,6 @@ class Apc(object):
         self.mLock = threading.Lock()
         self.writer = threading.Thread(target=self.main_loop, args=(), name='gt-writer')
         self.terminator = threading.Thread(target=self.terminator, args=(50,), name='gt-termin')
-        self.cpufreqth = threading.Thread(target=self.mcpufreq.display(0.1,), args=(0.1,), name='gt-cpufreq')
 
     def clean(slef):
         if (os.path.exists(slef.aName)):
@@ -41,9 +40,9 @@ class Apc(object):
         self.terminator.start()
         time.sleep(1)
         self.mBuf.setActivy(self.mActivy)
-        self.mBuf.main_loop()
         self.mcpufreq.setActivy(self.mActivy)
-        self.cpufreqth.start()
+        self.mBuf.main_loop()
+        self.mcpufreq.start()
 
     def stop(self):
         self.mCon.send_buff(self.stop_cmmd_buff)
