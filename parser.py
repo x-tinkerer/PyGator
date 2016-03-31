@@ -2,10 +2,10 @@ import show
 
 class Parser:
     mBuf = None
-    cpufreqDisplay = None
+    #cpufreqDisplay = None
     def __init__(self, buff):
         self.mBuf = buff
-        self.cpufreqDisplay = show.CpufreqDisplay(10)
+        #self.cpufreqDisplay = show.CpufreqDisplay(10)
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
@@ -155,7 +155,7 @@ class Parser:
         # print mInfo
 
         if Key == 0x2D: #cpufreq
-            self.cpufreqDisplay.update(Core,Timestamp/1000000, Value/1000000)
+            show.update(Core,Timestamp/1000000, Value/1000000)
 
     def handleBlock(self):
         pass

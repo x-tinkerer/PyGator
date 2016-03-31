@@ -44,7 +44,7 @@ class Xml(object):
     def recv_response(self):
         """Receive data to buff."""
         self.resp = self.mCon.recv_buff(5)
-        print repr(self.resp)
+        #print repr(self.resp)
 
     def recv_head(self):
         """Receive data to buff."""
@@ -54,12 +54,12 @@ class Xml(object):
         size, = struct.unpack('I', self.head[1:])
         self.buftype = type
         self.bufsize = size
-        print 'Recv Size ' + str(size)
+        #print 'Recv Size ' + str(size)
 
     def recv_body(self):
         """Receive data to buff."""
         self.body = self.mCon.recv_buff(self.bufsize)
-        print 'Recv ' + self.body
+        #print 'Recv ' + self.body
 
     def clean(slef):
         if (os.path.exists(slef.xName)):
