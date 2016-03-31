@@ -101,23 +101,55 @@ def make_point(cpu):
     return pointx, pointy
 
 fig = plt.figure()
-ax1 = fig.add_subplot(2, 1, 1, xlim=(0, 50000), ylim=(0, 2500))
-ax2 = fig.add_subplot(2, 1, 2, xlim=(0, 50000), ylim=(0, 2500))
+ax0 = fig.add_subplot(10, 1, 1, xlim=(0, 50000), ylim=(0, 2500))
+ax1 = fig.add_subplot(10, 1, 2, xlim=(0, 50000), ylim=(0, 2500))
+ax2 = fig.add_subplot(10, 1, 3, xlim=(0, 50000), ylim=(0, 2500))
+ax3 = fig.add_subplot(10, 1, 4, xlim=(0, 50000), ylim=(0, 2500))
+ax4 = fig.add_subplot(10, 1, 5, xlim=(0, 50000), ylim=(0, 2500))
+ax5 = fig.add_subplot(10, 1, 6, xlim=(0, 50000), ylim=(0, 2500))
+ax6 = fig.add_subplot(10, 1, 7, xlim=(0, 50000), ylim=(0, 2500))
+ax7 = fig.add_subplot(10, 1, 8, xlim=(0, 50000), ylim=(0, 2500))
+ax8 = fig.add_subplot(10, 1, 9, xlim=(0, 50000), ylim=(0, 2500))
+ax9 = fig.add_subplot(10, 1, 10, xlim=(0, 50000), ylim=(0, 2500))
 
-load_sum_l, = ax1.plot([], [], lw=1)
-load_sum_b, = ax2.plot([], [], lw=1)
-
+freq0, = ax0.plot([], [], lw=1)
+freq1, = ax1.plot([], [], lw=1)
+freq2, = ax2.plot([], [], lw=1)
+freq3, = ax3.plot([], [], lw=1)
+freq4, = ax4.plot([], [], lw=1)
+freq5, = ax5.plot([], [], lw=1)
+freq6, = ax6.plot([], [], lw=1)
+freq7, = ax7.plot([], [], lw=1)
+freq8, = ax8.plot([], [], lw=1)
+freq9, = ax9.plot([], [], lw=1)
 
 def init():
-    load_sum_l.set_data([], [])
-    load_sum_b.set_data([], [])
+    freq0.set_data([], [])
+    freq1.set_data([], [])
+    freq2.set_data([], [])
+    freq3.set_data([], [])
+    freq4.set_data([], [])
+    freq5.set_data([], [])
+    freq6.set_data([], [])
+    freq7.set_data([], [])
+    freq8.set_data([], [])
+    freq9.set_data([], [])
 
-    return load_sum_l, load_sum_b
+    return freq0, freq1, freq3, freq4, freq5, freq6, freq7, freq8, freq9
 
 def animate(cpu):
-    load_sum_l.set_data([0, 3000, 3000, 15000], [500,500,800,800])
-    load_sum_b.set_data([0, 3000, 3000, 15000], [500,500,800,800])
-    return load_sum_l, load_sum_b
+    freq0.set_data(make_point(0))
+    freq1.set_data(make_point(1))
+    freq2.set_data(make_point(2))
+    freq3.set_data(make_point(3))
+    freq4.set_data(make_point(4))
+    freq5.set_data(make_point(5))
+    freq6.set_data(make_point(6))
+    freq7.set_data(make_point(7))
+    freq8.set_data(make_point(8))
+    freq9.set_data(make_point(9))
+
+    return freq0, freq1, freq3, freq4, freq5, freq6, freq7, freq8, freq9
 
 def load_show():
     am = animation.FuncAnimation(fig, animate, init_func=init, frames=30, interval=10)

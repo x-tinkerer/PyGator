@@ -22,7 +22,7 @@ class Apc(object):
         #self.mcpufreq = show.CpufreqDisplay(10)
         self.mLock = threading.Lock()
         self.writer = threading.Thread(target=self.main_loop, args=(), name='gt-writer')
-        self.terminator = threading.Thread(target=self.terminator, args=(50,), name='gt-termin')
+        self.terminator = threading.Thread(target=self.terminator, args=(200,), name='gt-termin')
 
     def clean(slef):
         if (os.path.exists(slef.aName)):
