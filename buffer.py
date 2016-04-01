@@ -2,6 +2,7 @@ import parser
 import time
 import threading
 import Queue
+import show
 
 class Buffer(object):
     """Receive data for phone and then
@@ -132,7 +133,7 @@ class Buffer(object):
             self.mPar.handleName()
         elif frame_type == 4:
             print 'Parse Counter...'
-            self.mPar.handleCounter(self.cur_buff[1:])
+            self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1)
         elif frame_type == 5:
             print 'Parse Block...'
             self.mPar.handleBlock()

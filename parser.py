@@ -2,10 +2,11 @@ import show
 
 class Parser:
     mBuf = None
-    #cpufreqDisplay = None
+    mCpufreqCalc =None
+
     def __init__(self, buff):
         self.mBuf = buff
-        #self.cpufreqDisplay = show.CpufreqDisplay(10)
+        self.mCpufreqCalc = show.CpufreqCalc(10)
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
@@ -124,38 +125,41 @@ class Parser:
     def handleName(self):
         pass
 
-    def handleCounter(self, inbuf):
+    def handleCounter(self, inbuf, size):
         """
             Timestamp:
             Core:	packed32	Core to which this counter applies
             Key:	packed32	Key in Captured XML
             Value:	packed64	Value of the specified counter
         """
+        # print repr(inbuf)
         mPos = 0
-        mInfo = ''
-        bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
-        mPos += bytes
-        mInfo += 'Timestamp:' + str(Timestamp)
-        # print 'Timestamp: ' + str(Timestamp)
+        while mPos < size:
+            mInfo = ''
+            bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
+            mPos += bytes
+            mInfo += 'Timestamp:' + str(Timestamp)
+            # print 'Timestamp: ' + str(Timestamp)
 
-        bytes, Core = self.unpackInt64(inbuf[mPos:])
-        mPos += bytes
-        mInfo += '  Core: ' + str(Core)
-        # print 'Core: ' + str(Core)
+            bytes, Core = self.unpackInt64(inbuf[mPos:])
+            mPos += bytes
+            mInfo += '  Core: ' + str(Core)
+            # print 'Core: ' + str(Core)
 
-        bytes, Key = self.unpackInt64(inbuf[mPos:])
-        mPos += bytes
-        # print 'Key: ' + str(Key)
-        mInfo += '  Key: ' + str(Key)
+            bytes, Key = self.unpackInt64(inbuf[mPos:])
+            mPos += bytes
+            # print 'Key: ' + str(Key)
+            mInfo += '  Key: ' + str(Key)
 
-        bytes, Value = self.unpackInt64(inbuf[mPos:])
-        mPos += bytes
-        mInfo += '  Value: ' + str(Value)
-        # print 'Value: ' + str(Value)
-        # print mInfo
+            bytes, Value = self.unpackInt64(inbuf[mPos:])
+            mPos += bytes
+            mInfo += '  Value: ' + str(Value)
+            # print 'Value: ' + str(Value)
+            # print mInfo
 
-        if Key == 0x2D: #cpufreq
-            show.update(Core,Timestamp/1000000, Value/1000000)
+            if Key == 0x2D: #cpufreq
+                self.mCpufreqCalc.update_freq_list(Core, Timestamp/1000000, Value/1000000)
+                self.mCpufreqCalc.update_freq_bit(Core, Timestamp / 1000000, Value / 1000000)
 
     def handleBlock(self):
         pass
