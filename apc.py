@@ -19,7 +19,6 @@ class Apc(object):
         self.aName = name
         self.mCon = con
         self.mBuf = buffer.Buffer(con)
-        #self.mcpufreq = show.CpufreqDisplay(10)
         self.mLock = threading.Lock()
         self.writer = threading.Thread(target=self.main_loop, args=(), name='gt-writer')
         self.terminator = threading.Thread(target=self.terminator, args=(200,), name='gt-termin')
@@ -40,10 +39,7 @@ class Apc(object):
         self.terminator.start()
         time.sleep(1)
         self.mBuf.setActivy(self.mActivy)
-        #self.mcpufreq.setActivy(self.mActivy)
         self.mBuf.main_loop()
-        #self.mcpufreq.start()
-        show.startShow()
 
     def stop(self):
         self.mCon.send_buff(self.stop_cmmd_buff)
