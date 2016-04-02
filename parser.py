@@ -135,25 +135,25 @@ class Parser:
         # print repr(inbuf)
         mPos = 0
         while mPos < size:
-            mInfo = ''
+            #mInfo = ''
             bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            mInfo += 'Timestamp:' + str(Timestamp)
+            #mInfo += 'Timestamp:' + str(Timestamp)
             # print 'Timestamp: ' + str(Timestamp)
 
             bytes, Core = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            mInfo += '  Core: ' + str(Core)
+            #mInfo += '  Core: ' + str(Core)
             # print 'Core: ' + str(Core)
 
             bytes, Key = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
             # print 'Key: ' + str(Key)
-            mInfo += '  Key: ' + str(Key)
+            #mInfo += '  Key: ' + str(Key)
 
             bytes, Value = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            mInfo += '  Value: ' + str(Value)
+            #mInfo += '  Value: ' + str(Value)
             # print 'Value: ' + str(Value)
             # print mInfo
 
@@ -181,3 +181,4 @@ class Parser:
 
     def handleActivity(self):
         pass
+

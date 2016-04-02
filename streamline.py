@@ -19,6 +19,7 @@ class Streamline(object):
     mBuf = None     # Receive buffer
     mXml = None
     mAPC = None
+    mCalc = None
 
     def __init__(self):
         self.mCon = connector.Connector('localhost', 8084)
@@ -28,6 +29,8 @@ class Streamline(object):
         self.capturedXML = xml.CapturedXML(self.mCon)
         self.sessionXML = xml.SessionXML(self.mCon)
         self.mAPC = apc.Apc(self.mCon, '0000000000')
+
+        self.mCalc = self.mBuf.mPar.mCpufreqCalc
 
     def prepare_xml(self):
         self.eventsXML.clean()
@@ -83,6 +86,11 @@ class Streamline(object):
     def stop_record(self):
         self.mAPC.stop()
 
+    def getCpuTimelineArray(self, cpu):
+        return self.mCalc.getCpuTimelineArray(cpu)
+
+    def getCpuFreqArray(self, cpu):
+        return self.mCalc.getCpuFreqArray(cpu)
 
 
 

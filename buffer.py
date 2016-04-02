@@ -54,7 +54,7 @@ class Buffer(object):
                 self.mData = self.mCon.recv_buff(self.mSize)
                 num = len(self.mData)
                 if num > 0:
-                    print 'Recv ' + str(num) + 'Bytes from gatord'
+                    # print 'Recv ' + str(num) + 'bytes from gatord'
                     self.fifo_mutex.acquire()
                     for index in range(0, num):
                         self.mFifo.put(self.mData[index])
@@ -92,7 +92,7 @@ class Buffer(object):
         self.cur_buff_type = btype
         self.cur_buff_size = size
         self.status = 1
-        print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
+        # print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
 
     def process_body(self):
         """Receive data to buff."""

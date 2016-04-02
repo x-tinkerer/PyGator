@@ -13,11 +13,16 @@ from matplotlib.figure import Figure
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
         fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        self.axes.hold(False)
+
+        self.plotnum = subs
+        self.sl = streamline
+        self.axes = []
+        for i in range(subs):
+            self.axes.append(fig.add_subplot(subs, 1, i + 1))
+            # We want the axes cleared every time plot() is called
+            self.axes[i].hold(False)
 
         self.compute_initial_figure()
 
@@ -33,15 +38,6 @@ class MyMplCanvas(FigureCanvas):
     def compute_initial_figure(self):
         pass
 
-
-class MyStaticMplCanvas(MyMplCanvas):
-    """Simple canvas with a sine plot."""
-
-    def compute_initial_figure(self):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
-        self.axes.plot(t, s)
-
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
 
@@ -52,13 +48,14 @@ class MyDynamicMplCanvas(MyMplCanvas):
         timer.start(500)
 
     def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+        for i in range(self.plotnum):
+            self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
-        # Build a list of 4 random integers between 0 and 10 (both inclusive)
-        l = [random.randint(0, 10) for i in range(4)]
-
-        self.axes.plot([0, 1, 2, 3], l, 'r')
+        for i in range(self.plotnum):
+            x = self.sl.getCpuTimelineArray(i)
+            y = self.sl.getCpuFreqArray(i)
+            self.axes[i].plot(x, y, 'r')
         self.draw()
 
 class MainForm(QtGui.QMainWindow):
@@ -96,14 +93,13 @@ class MainForm(QtGui.QMainWindow):
         self.creat_menu_bar()
         self.add_plot()
 
-        self.statusBar().showMessage("Ready!", 2000)
+        self.statusBar().showMessage("Ready!")
 
     def add_plot(self):
         self.main_widget = QtGui.QWidget(self)
         l = QtGui.QVBoxLayout(self.main_widget)
-        for cpu in range(10):
-            dc = MyDynamicMplCanvas(self.main_widget, width=20000, height=2500, dpi=100)
-            l.addWidget(dc)
+        dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=10)
+        l.addWidget(dc)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)

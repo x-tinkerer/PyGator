@@ -1,7 +1,3 @@
-import time
-import matplotlib.pyplot as plt
-from matplotlib import animation
-
 class Calc(object):
     def __init__(self):
         pass
@@ -35,6 +31,12 @@ class CpufreqCalc(Calc):
 
         self.lastkey[cpu] = value
         self.lastts[cpu] = ts
+
+    def getCpuTimelineArray(self, cpu):
+        return self.timeline[cpu]
+
+    def getCpuFreqArray(self, cpu):
+        return self.cpufreq[cpu]
 
 class GpufreqCalc(Calc):
     def __init__(self):
