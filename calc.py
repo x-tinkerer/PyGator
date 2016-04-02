@@ -7,18 +7,21 @@ class CpufreqCalc(Calc):
         self.cpuNum = num
         self.freqinfo = [{} for x in range(num)]
 
-        self.cpufreq = [[] for i in range(num)]
-        self.timeline = [[] for i in range(num)]
-        self.count = [0 for x in range(num)]
+        # self.cpufreq = [[] for i in range(num)]
+        # self.timeline = [[] for i in range(num)]
+        # self.count = [0 for x in range(num)]
 
         self.lastkey = [-1 for x in range(num)]
         self.lastts = [-1 for x in range(num)]
 
     def update_freq_list(self, cpu, ts, value):
-        self.cpufreq[cpu].append(value)
-        self.timeline[cpu].append(ts)
+        global cpufreq
+        global timeline
+        global count
+        cpufreq[cpu].append(value)
+        timeline[cpu].append(ts)
+        count[cpu] += 1
 
-        self.count[cpu] += 1
 
     def update_freq_bit(self, cpu, ts, value):
         if not self.freqinfo[cpu].has_key(value):
@@ -31,12 +34,6 @@ class CpufreqCalc(Calc):
 
         self.lastkey[cpu] = value
         self.lastts[cpu] = ts
-
-    def getCpuTimelineArray(self, cpu):
-        return self.timeline[cpu]
-
-    def getCpuFreqArray(self, cpu):
-        return self.cpufreq[cpu]
 
 class GpufreqCalc(Calc):
     def __init__(self):

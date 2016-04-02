@@ -10,12 +10,22 @@ from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+cpufreq = None
+timeline = None
+count = None
+
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
     def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
         fig = Figure(figsize=(width, height), dpi=dpi)
 
+        global cpufreq
+        global timeline
+        global count
+        cpufreq = [[] for i in range(subs)]
+        timeline = [[] for i in range(subs)]
+        count = [0 for x in range(subs)]
         self.plotnum = subs
         self.sl = streamline
         self.axes = []
@@ -52,9 +62,11 @@ class MyDynamicMplCanvas(MyMplCanvas):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
+        global cpufreq
+        global timeline
         for i in range(self.plotnum):
-            x = self.sl.getCpuTimelineArray(i)
-            y = self.sl.getCpuFreqArray(i)
+            x = timeline[i]
+            y = cpufreq[i]
             self.axes[i].plot(x, y, 'r')
         self.draw()
 
