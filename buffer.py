@@ -2,7 +2,6 @@ import parser
 import time
 import threading
 import Queue
-import show
 
 class Buffer(object):
     """Receive data for phone and then
@@ -21,7 +20,7 @@ class Buffer(object):
     fSize = 0
     mRecv_Thread = None
     mProc_Thread = None
-    mActivy = False
+    mActivity = False
     """
     status:
     0: need process head
@@ -45,26 +44,27 @@ class Buffer(object):
         self.mReady = 0
         self.status = 0
         self.fifo_mutex = threading.Lock()
-        self.mRecv_Thread = threading.Thread(target=self.receive_main, args=(), name='gt-recv')
-        self.mProc_Thread = threading.Thread(target=self.process_main, args=(), name='gt-proc')
+        self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
+        self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')
 
-    def receive_main(self):
-        while self.mActivy:
+    def th_receive(self):
+        while self.mActivity:
             if self.mReady == 0:
                 # Receive Data
                 self.mData = self.mCon.recv_buff(self.mSize)
                 num = len(self.mData)
-                print 'Recv ' + str(num) + 'Bytes from gatord'
-                self.fifo_mutex.acquire()
-                for index in range(0, num):
-                    self.mFifo.put(self.mData[index])
-                self.mReady = 1
-                self.fifo_mutex.release()
+                if num > 0:
+                    print 'Recv ' + str(num) + 'Bytes from gatord'
+                    self.fifo_mutex.acquire()
+                    for index in range(0, num):
+                        self.mFifo.put(self.mData[index])
+                    self.mReady = 1
+                    self.fifo_mutex.release()
             else:
                 time.sleep(0.1)
 
-    def process_main(self):
-        while self.mActivy:
+    def th_process(self):
+        while self.mActivity:
             if self.mFifo.empty():
                 time.sleep(0.1)
             else:
@@ -75,7 +75,6 @@ class Buffer(object):
                 if self.status == 1 and self.mFifo.qsize() >= self.cur_buff_size:
                     self.process_body()
                 self.fifo_mutex.release()
-
 
     def process_head(self):
         """Receive data to buff."""
@@ -168,10 +167,10 @@ class Buffer(object):
         """Performs operation blah."""
         self.mCon.recv_buff(self.mData, self.mSize)
 
-    def setActivy(self, act):
-        self.mActivy = act
+    def setActivity(self, act):
+        self.mActivity = act
 
-    def main_loop(self):
+    def start(self):
         """Performs operation blah."""
         self.mRecv_Thread.start()
         self.mProc_Thread.start()

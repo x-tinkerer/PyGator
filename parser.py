@@ -1,4 +1,4 @@
-import show
+import calc
 
 class Parser:
     mBuf = None
@@ -6,7 +6,7 @@ class Parser:
 
     def __init__(self, buff):
         self.mBuf = buff
-        self.mCpufreqCalc = show.CpufreqCalc(10)
+        self.mCpufreqCalc = calc.CpufreqCalc(10)
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
