@@ -15,8 +15,8 @@ class Streamline(object):
     countersXML = None
     capturedXML = None
     sessionXML = None
-    mCon = None # connector
-    mBuf = None # Receive buffer
+    mCon = None     # connector
+    mBuf = None     # Receive buffer
     mXml = None
     mAPC = None
 
@@ -83,8 +83,6 @@ class Streamline(object):
     def stop_record(self):
         self.mAPC.stop()
 
-    def main_loop(self):
-        self.mAPC.main_loop()
 
 
 

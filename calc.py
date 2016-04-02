@@ -68,16 +68,4 @@ class FpsCalc(Calc):
         pass
 
 
-fig = plt.figure()
-ax0 = fig.add_subplot(10, 1, 1, xlim=(0, 20000), ylim=(0, 2100))
 
-def init():
-    pass
-def animate(cpu):
-    pass
-def load_show():
-    am = animation.FuncAnimation(fig, animate, init_func=init, frames=30, interval=10)
-    plt.show()
-
-if __name__ == "__main__":
-    load_show()
