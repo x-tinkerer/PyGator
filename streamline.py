@@ -62,7 +62,13 @@ class MyDynamicMplCanvas(MyMplCanvas):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i+1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i])
                 self.axes[i].plot(x, y, 'g')
-                self.axes[i].set_xlim(0, 20000)
+                if self.sl.mBuf.mDisplayData.lastFreqts[i] > 20000:
+                    xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[i] - 20000
+                    xmaxlimit = self.sl.mBuf.mDisplayData.lastFreqts[i]
+                else:
+                    xminlimit = 0
+                    xmaxlimit = 20000
+                self.axes[i].set_xlim(xminlimit, xmaxlimit)
                 self.axes[i].set_ylim(0, 2500)
             self.draw()
             self.sl.mBuf.mDisplayData.cpufreq_lock.release()

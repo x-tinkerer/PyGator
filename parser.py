@@ -166,7 +166,7 @@ class Parser(object):
                 outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
 
                 outbuf.lastCpufreq[Core] = Value
-
+                outbuf.lastFreqts[Core] = Timestamp / 1000000
                 outbuf.cpufreq_lock.release()
 
     def handleBlock(self):
