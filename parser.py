@@ -157,8 +157,16 @@ class Parser(object):
 
             if Key == 0x2D: #cpufreq
                 outbuf.cpufreq_lock.acquire()
+
+                if Value != outbuf.lastCpufreq[Core] and outbuf.lastCpufreq[Core] != -1:
+                    outbuf.cpufreq[Core * 2].append(outbuf.lastCpufreq[Core]/1000000)
+                    outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+
                 outbuf.cpufreq[Core * 2].append(Value / 1000000)
                 outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+
+                outbuf.lastCpufreq[Core] = Value
+                outbuf.lastFreqts[Core] = Timestamp / 1000000
                 outbuf.cpufreq_lock.release()
 
     def handleBlock(self):

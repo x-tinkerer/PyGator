@@ -21,6 +21,7 @@ class MyMplCanvas(FigureCanvas):
 
         self.plotnum = subs
         self.sl = streamline
+
         self.axes = []
         for i in range(subs):
             self.axes.append(fig.add_subplot(subs, 1, i + 1))
@@ -60,9 +61,15 @@ class MyDynamicMplCanvas(MyMplCanvas):
             for i in range(self.plotnum):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i+1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i])
-                #x = [255, 255, 800, 800]
-                #y = [0, 1000, 1000, 1500]
                 self.axes[i].plot(x, y, 'g')
+                if self.sl.mBuf.mDisplayData.lastFreqts[i] > 20000:
+                    xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[i] - 20000
+                    xmaxlimit = self.sl.mBuf.mDisplayData.lastFreqts[i]
+                else:
+                    xminlimit = 0
+                    xmaxlimit = 20000
+                self.axes[i].set_xlim(xminlimit, xmaxlimit)
+                self.axes[i].set_ylim(0, 2500)
             self.draw()
             self.sl.mBuf.mDisplayData.cpufreq_lock.release()
 
@@ -72,6 +79,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 class MainForm(QtGui.QMainWindow):
     def __init__(self, streamline):
         super(MainForm, self).__init__()
+        self.mActivity = False
         self.sl = streamline
         self.initUI()
 
@@ -119,12 +127,15 @@ class MainForm(QtGui.QMainWindow):
         pass
 
     def startCapture(self):
-        self.sl.start()
+        if self.mActivity == False:
+            self.sl.start()
+            self.mActivity = True
 
     def stopCapture(self):
-        self.sl.stop()
-        time.sleep(10)
-        self.dc.stop_timer()
+        if self.mActivity == True:
+            self.sl.stop()
+            self.dc.stop_timer()
+            self.mActivity = False
 
     def showCalc(self):
         pass
