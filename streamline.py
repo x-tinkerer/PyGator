@@ -21,6 +21,7 @@ class MyMplCanvas(FigureCanvas):
 
         self.plotnum = subs
         self.sl = streamline
+
         self.axes = []
         for i in range(subs):
             self.axes.append(fig.add_subplot(subs, 1, i + 1))
@@ -60,9 +61,9 @@ class MyDynamicMplCanvas(MyMplCanvas):
             for i in range(self.plotnum):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i+1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i])
-                #x = [255, 255, 800, 800]
-                #y = [0, 1000, 1000, 1500]
                 self.axes[i].plot(x, y, 'g')
+                self.axes[i].set_xlim(0, 20000)
+                self.axes[i].set_ylim(0, 2500)
             self.draw()
             self.sl.mBuf.mDisplayData.cpufreq_lock.release()
 

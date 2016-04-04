@@ -8,6 +8,7 @@ class CpuFreqData(object):
         self.cpufreq_lock = threading.Lock()
         # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
         self.cpufreq = [[] for i in range(num * 2)]
+        self.lastCpufreq = [-1 for i in range(num)]
 
 
 class CpuUsageData(object):
