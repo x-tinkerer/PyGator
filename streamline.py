@@ -11,6 +11,7 @@ use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import numpy as np
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -47,7 +48,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         self.updatetimer = QtCore.QTimer(self)
         self.updatetimer.timeout.connect(self.update_figure)
-        self.updatetimer.start(100)
+        self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
         for i in range(self.plotnum):
@@ -55,12 +56,15 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
     def update_figure(self):
         if(self.sl.status > 0):
-            self.sl.main_loop()
+            self.sl.mBuf.mDisplayData.cpufreq_lock.acquire()
             for i in range(self.plotnum):
-                x = self.sl.mBuf.mDisplayData.cpufreq[i]
-                y = self.sl.mBuf.mDisplayData.cpufreq[i+1]
-                self.axes[i].plot(x, y, 'r')
+                x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i+1])
+                y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i])
+                #x = [255, 255, 800, 800]
+                #y = [0, 1000, 1000, 1500]
+                self.axes[i].plot(x, y, 'g')
             self.draw()
+            self.sl.mBuf.mDisplayData.cpufreq_lock.release()
 
     def stop_timer(self):
         self.updatetimer.stop()
@@ -146,13 +150,12 @@ class Streamline(object):
 
     def __init__(self):
         self.mCon = connector.Connector('localhost', 8084)
-        self.mBuf = buffer.Buffer(self.mCon)  # 4M Size
         self.eventsXML = xml.EventsXML(self.mCon)
         self.countersXML = xml.CountersXML(self.mCon)
         self.capturedXML = xml.CapturedXML(self.mCon)
         self.sessionXML = xml.SessionXML(self.mCon)
         self.mAPC = apc.Apc(self.mCon, '0000000000')
-
+        self.mBuf = buffer.Buffer(self.mCon, self.mAPC)
         self.status = -1
 
     def prepare_xml(self):
@@ -202,9 +205,12 @@ class Streamline(object):
 
     def send_start(self):
         self.mAPC.send_start()
+        self.mBuf.setActivity(True)
+        self.mBuf.start()
 
     def send_stop(self):
         self.mAPC.send_stop()
+        self.mBuf.setActivity(False)
 
     def start(self):
         # 1. Prepare
@@ -230,10 +236,6 @@ class Streamline(object):
     ################################################
     #                 Main Loop
     ################################################
-    def main_loop(self):
-        self.mBuf.buffer_receive()
-        self.mAPC.writeApc(self.mBuf.mData)
-        self.mBuf.buffer_process()
 
 if __name__ == "__main__":
     sl = Streamline()

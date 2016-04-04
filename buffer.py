@@ -1,26 +1,31 @@
 import parser
 import Queue
 import threading
+import time
 
 class CpuFreqData(object):
     def __init__(self, num):
+        self.cpufreq_lock = threading.Lock()
         # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
         self.cpufreq = [[] for i in range(num * 2)]
 
 
 class CpuUsageData(object):
     def __init__(self, num):
+        self.cpuusag_lock = threading.Lock()
         # [sys[0],user[0], ... , sys[9],user[9]]
         self.usage = [[] for i in range(num * 2)]
 
 class GpuFreqData(object):
     def __init__(self):
         # freq[0], ts[0]
+        self.gpufreq_lock = threading.Lock()
         self.gpufreq = [[], []]
 
 class FpsData(object):
     def __init__(self):
         # fps[0], ts[0]
+        self.fps_lock = threading.Lock()
         self.fps = [[], []]
 
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
@@ -40,9 +45,8 @@ class Buffer(object):
     mPar = None     # parser
     mData = None    # receive buff
     mFifo = None    # get
-    mReady = 0
+    mAPC = None
     mSize = 0
-    fSize = 0
     mRecv_Thread = None
     mProc_Thread = None
     mActivity = False
@@ -50,11 +54,19 @@ class Buffer(object):
     mDisplayData = None
 
     """
-        status:
-            0: need process head
-            1: need process body
+        pstatus:
+            0: no data need process
+            1: need process head
+            2: need process body
     """
-    status = 0
+    pstatus = 0
+
+    """
+        rstatus:
+            0: receive some data
+            1: do not have receive any data
+    """
+    rstatus = 0
 
     cur_head = None
     cur_buff_type = -1
@@ -62,37 +74,52 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, size=4 * 1024, fsize=4 * 1024 * 1024):
+    def __init__(self, con, apc, size=4096, fsize=4 * 1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
+        self.mAPC = apc
         self.mSize = size
         self.mPar = parser.Parser(self.cur_buff)
         self.mFifo = Queue.Queue(fsize)
-        self.fSize = fsize
         self.fifo_mutex = threading.Lock()
 
         self.mDisplayData = CpuFreqData(10)
 
-    def buffer_receive(self):
+        self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
+        self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')
 
-        # Receive Data
-        self.mData = self.mCon.recv_buff(self.mSize)
-        num = len(self.mData)
-        if num > 0:
-            # print 'Recv ' + str(num) + 'bytes from gatord'
-            self.fifo_mutex.acquire()
-            for index in range(0, num):
-                self.mFifo.put(self.mData[index])
-            self.fifo_mutex.release()
+    def th_receive(self):
+        while self.mActivity or self.rstatus:
+            # Receive Data
+            self.mData = self.mCon.recv_buff(self.mSize)
+            num = len(self.mData)
+            if num > 0:
+                self.rstatus = 1
+                self.mAPC.writeApc(self.mData)
+                # print 'Recv ' + str(num) + 'bytes from gatord'
+                if self.pstatus ==0:
+                    self.pstatus = 1
+                self.fifo_mutex.acquire()
+                for index in range(0, num):
+                    self.mFifo.put(self.mData[index])
+                self.fifo_mutex.release()
+            else:
+                time.sleep(0.1)
+                self.rstatus = 0
 
-    def buffer_process(self):
-        self.fifo_mutex.acquire()
-        # Parse and collection
-        if self.status == 0 and self.mFifo.qsize() > 5:
-            self.process_head()
-        if self.status == 1 and self.mFifo.qsize() >= self.cur_buff_size:
-            self.process_body()
-        self.fifo_mutex.release()
+    def th_process(self):
+        while self.mActivity or self.pstatus:
+            if self.mFifo.empty():
+                time.sleep(0.1)
+                self.pstatus = 0
+            else:
+                self.fifo_mutex.acquire()
+                # Parse and collection
+                if self.pstatus == 1 and self.mFifo.qsize() > 5:
+                    self.process_head()
+                if self.pstatus == 2 and self.mFifo.qsize() >= self.cur_buff_size:
+                    self.process_body()
+                self.fifo_mutex.release()
 
     def process_head(self):
         """Receive data to buff."""
@@ -109,7 +136,7 @@ class Buffer(object):
         size = s1 | s2 | s3 | s4
         self.cur_buff_type = btype
         self.cur_buff_size = size
-        self.status = 1
+        self.pstatus = 2
         # print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
 
     def process_body(self):
@@ -175,10 +202,16 @@ class Buffer(object):
         else:
             print "Body type err."
 
-        self.status = 0
+        self.pstatus = 1
 
-    def recv_buff(self):
+    def setActivity(self, act):
+        self.mActivity = act
+
+    def start(self):
         """Performs operation blah."""
-        self.mCon.recv_buff(self.mData, self.mSize)
+        # self.mRecv_Thread.setDaemon(True)
+        self.mRecv_Thread.start()
+        # self.mProc_Thread.setDaemon(True)
+        self.mProc_Thread.start()
 
 
