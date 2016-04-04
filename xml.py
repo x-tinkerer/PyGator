@@ -1,7 +1,6 @@
 from lxml import etree
 import os
 import struct
-import array
 
 class Xml(object):
     xname = None

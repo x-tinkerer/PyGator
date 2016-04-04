@@ -1,32 +1,72 @@
 import parser
-import time
-import threading
 import Queue
+import threading
+import time
+
+class CpuFreqData(object):
+    def __init__(self, num):
+        self.cpufreq_lock = threading.Lock()
+        # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
+        self.cpufreq = [[] for i in range(num * 2)]
+
+
+class CpuUsageData(object):
+    def __init__(self, num):
+        self.cpuusag_lock = threading.Lock()
+        # [sys[0],user[0], ... , sys[9],user[9]]
+        self.usage = [[] for i in range(num * 2)]
+
+class GpuFreqData(object):
+    def __init__(self):
+        # freq[0], ts[0]
+        self.gpufreq_lock = threading.Lock()
+        self.gpufreq = [[], []]
+
+class FpsData(object):
+    def __init__(self):
+        # fps[0], ts[0]
+        self.fps_lock = threading.Lock()
+        self.fps = [[], []]
+
+class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
+    def __init__(self, num):
+        self.cpunum =num
+        CpuFreqData.__init__(num)
+        CpuUsageData.__init__(num)
+        GpuFreqData.__init__()
+        FpsData.__init__()
 
 class Buffer(object):
     """Receive data for phone and then
     1. save pac as file
     2. pass data to parser to analyses buff.
-
-    Attributes:
-
     """
-    mCon = None
-    mPar = None
-    mData = None
-    mFifo = None
-    mReady = 0
+    mCon = None     # socket connector
+    mPar = None     # parser
+    mData = None    # receive buff
+    mFifo = None    # get
+    mAPC = None
     mSize = 0
-    fSize = 0
     mRecv_Thread = None
     mProc_Thread = None
     mActivity = False
+
+    mDisplayData = None
+
     """
-    status:
-    0: need process head
-    1: need process body
+        pstatus:
+            0: no data need process
+            1: need process head
+            2: need process body
     """
-    status = 0
+    pstatus = 0
+
+    """
+        rstatus:
+            0: receive some data
+            1: do not have receive any data
+    """
+    rstatus = 0
 
     cur_head = None
     cur_buff_type = -1
@@ -34,45 +74,50 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, size=4 * 1024, fsize=4 * 1024 * 1024):
+    def __init__(self, con, apc, size=4096, fsize=4 * 1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
+        self.mAPC = apc
         self.mSize = size
         self.mPar = parser.Parser(self.cur_buff)
         self.mFifo = Queue.Queue(fsize)
-        self.fSize = fsize
-        self.mReady = 0
-        self.status = 0
         self.fifo_mutex = threading.Lock()
+
+        self.mDisplayData = CpuFreqData(10)
+
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
         self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')
 
     def th_receive(self):
-        while self.mActivity:
-            if self.mReady == 0:
-                # Receive Data
-                self.mData = self.mCon.recv_buff(self.mSize)
-                num = len(self.mData)
-                if num > 0:
-                    # print 'Recv ' + str(num) + 'bytes from gatord'
-                    self.fifo_mutex.acquire()
-                    for index in range(0, num):
-                        self.mFifo.put(self.mData[index])
-                    self.mReady = 1
-                    self.fifo_mutex.release()
+        while self.mActivity or self.rstatus:
+            # Receive Data
+            self.mData = self.mCon.recv_buff(self.mSize)
+            num = len(self.mData)
+            if num > 0:
+                self.rstatus = 1
+                self.mAPC.writeApc(self.mData)
+                # print 'Recv ' + str(num) + 'bytes from gatord'
+                if self.pstatus ==0:
+                    self.pstatus = 1
+                self.fifo_mutex.acquire()
+                for index in range(0, num):
+                    self.mFifo.put(self.mData[index])
+                self.fifo_mutex.release()
             else:
                 time.sleep(0.1)
+                self.rstatus = 0
 
     def th_process(self):
-        while self.mActivity:
+        while self.mActivity or self.pstatus:
             if self.mFifo.empty():
                 time.sleep(0.1)
+                self.pstatus = 0
             else:
                 self.fifo_mutex.acquire()
                 # Parse and collection
-                if self.status == 0 and self.mFifo.qsize() > 5:
+                if self.pstatus == 1 and self.mFifo.qsize() > 5:
                     self.process_head()
-                if self.status == 1 and self.mFifo.qsize() >= self.cur_buff_size:
+                if self.pstatus == 2 and self.mFifo.qsize() >= self.cur_buff_size:
                     self.process_body()
                 self.fifo_mutex.release()
 
@@ -91,7 +136,7 @@ class Buffer(object):
         size = s1 | s2 | s3 | s4
         self.cur_buff_type = btype
         self.cur_buff_size = size
-        self.status = 1
+        self.pstatus = 2
         # print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
 
     def process_body(self):
@@ -132,7 +177,7 @@ class Buffer(object):
             self.mPar.handleName()
         elif frame_type == 4:
             print 'Parse Counter...'
-            self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1)
+            self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1, self.mDisplayData)
         elif frame_type == 5:
             print 'Parse Block...'
             self.mPar.handleBlock()
@@ -157,21 +202,16 @@ class Buffer(object):
         else:
             print "Body type err."
 
-        self.status = 0
-
-    def setmReady(self, ready):
-        """Performs operation blah."""
-        self.mReady = ready
-
-    def recv_buff(self):
-        """Performs operation blah."""
-        self.mCon.recv_buff(self.mData, self.mSize)
+        self.pstatus = 1
 
     def setActivity(self, act):
         self.mActivity = act
 
     def start(self):
         """Performs operation blah."""
+        # self.mRecv_Thread.setDaemon(True)
         self.mRecv_Thread.start()
+        # self.mProc_Thread.setDaemon(True)
         self.mProc_Thread.start()
+
 

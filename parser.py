@@ -1,12 +1,10 @@
-import calc
 
-class Parser:
+class Parser(object):
     mBuf = None
-    mCpufreqCalc =None
 
     def __init__(self, buff):
         self.mBuf = buff
-        self.mCpufreqCalc = calc.CpufreqCalc(10)
+
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
@@ -125,7 +123,7 @@ class Parser:
     def handleName(self):
         pass
 
-    def handleCounter(self, inbuf, size):
+    def handleCounter(self, inbuf, size, outbuf):
         """
             Timestamp:
             Core:	packed32	Core to which this counter applies
@@ -158,8 +156,10 @@ class Parser:
             # print mInfo
 
             if Key == 0x2D: #cpufreq
-                self.mCpufreqCalc.update_freq_list(Core, Timestamp/1000000, Value/1000000)
-                self.mCpufreqCalc.update_freq_bit(Core, Timestamp / 1000000, Value / 1000000)
+                outbuf.cpufreq_lock.acquire()
+                outbuf.cpufreq[Core * 2].append(Value / 1000000)
+                outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+                outbuf.cpufreq_lock.release()
 
     def handleBlock(self):
         pass
