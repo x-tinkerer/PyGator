@@ -79,6 +79,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 class MainForm(QtGui.QMainWindow):
     def __init__(self, streamline):
         super(MainForm, self).__init__()
+        self.mActivity = False
         self.sl = streamline
         self.initUI()
 
@@ -126,12 +127,15 @@ class MainForm(QtGui.QMainWindow):
         pass
 
     def startCapture(self):
-        self.sl.start()
+        if self.mActivity == False:
+            self.sl.start()
+            self.mActivity = True
 
     def stopCapture(self):
-        self.sl.stop()
-        time.sleep(10)
-        self.dc.stop_timer()
+        if self.mActivity == True:
+            self.sl.stop()
+            self.dc.stop_timer()
+            self.mActivity = False
 
     def showCalc(self):
         pass

@@ -75,7 +75,7 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, apc, size=4096, fsize=4 * 1024 * 1024):
+    def __init__(self, con, apc, size=10240, fsize=4 * 1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
         self.mAPC = apc
