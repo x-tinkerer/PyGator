@@ -7,11 +7,13 @@ import buffer
 import connector
 
 from matplotlib.backends import qt_compat
+
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
+
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -42,6 +44,7 @@ class MyMplCanvas(FigureCanvas):
     def compute_initial_figure(self):
         pass
 
+
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
 
@@ -56,11 +59,11 @@ class MyDynamicMplCanvas(MyMplCanvas):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
-        if(self.sl.status > 0):
+        if (self.sl.status > 0):
             self.sl.mBuf.mDisplayData.cpufreq_lock.acquire()
             for i in range(self.plotnum):
-                x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i+1])
-                y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2*i])
+                x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i + 1])
+                y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i])
                 self.axes[i].plot(x, y, 'g')
                 if self.sl.mBuf.mDisplayData.lastFreqts[i] > 20000:
                     xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[i] - 20000
@@ -75,6 +78,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
     def stop_timer(self):
         self.updatetimer.stop()
+
 
 class MainForm(QtGui.QMainWindow):
     def __init__(self, streamline):
@@ -152,8 +156,8 @@ class Streamline(object):
     countersXML = None
     capturedXML = None
     sessionXML = None
-    mCon = None     # connector
-    mBuf = None     # Receive buffer
+    mCon = None  # connector
+    mBuf = None  # Receive buffer
     mXml = None
     mAPC = None
 
@@ -244,9 +248,10 @@ class Streamline(object):
         self.send_stop()
         self.status = 2
 
-    ################################################
-    #                 Main Loop
-    ################################################
+        ################################################
+        #                 Main Loop
+        ################################################
+
 
 if __name__ == "__main__":
     sl = Streamline()

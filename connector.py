@@ -1,6 +1,7 @@
 import socket
 import traceback
 
+
 class Connector(object):
     """Receive data for phone and then
     1. save pac as file
@@ -45,4 +46,3 @@ class Connector(object):
     def send_buff(self, buff):
         """Send buff to gatord"""
         self.sock.send(buff)
-

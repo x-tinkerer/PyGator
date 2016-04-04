@@ -1,15 +1,12 @@
-
 class Parser(object):
     mBuf = None
 
     def __init__(self, buff):
         self.mBuf = buff
 
-
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
         return size, result
-
 
     def readBytes(self, inbytes, size):
         result = 0
@@ -18,7 +15,6 @@ class Parser(object):
             result |= (cur & 0xff) << (count * 8)
 
         return size, result
-
 
     def unpackInt(self, inbytes):
         result = 0
@@ -37,7 +33,6 @@ class Parser(object):
             result |= signBits
         return count, result
 
-
     def unpackInt64(self, inbytes):
         result = 0
         count = 0
@@ -55,10 +50,10 @@ class Parser(object):
             result |= signBits
         return count, result
 
-
     """
         Core:	packed32	ONLY Backtrace, Name, Block Counter, Scheduler Trace and Proc Frames;
     """
+
     def handleSummary(self, sumbuf):
         mPos = 0
 
@@ -116,7 +111,6 @@ class Parser(object):
             mPos += bytes
             print 'Name:' + Name
 
-
     def handleBacktrace(self):
         pass
 
@@ -133,33 +127,33 @@ class Parser(object):
         # print repr(inbuf)
         mPos = 0
         while mPos < size:
-            #mInfo = ''
+            # mInfo = ''
             bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            #mInfo += 'Timestamp:' + str(Timestamp)
+            # mInfo += 'Timestamp:' + str(Timestamp)
             # print 'Timestamp: ' + str(Timestamp)
 
             bytes, Core = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            #mInfo += '  Core: ' + str(Core)
+            # mInfo += '  Core: ' + str(Core)
             # print 'Core: ' + str(Core)
 
             bytes, Key = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
             # print 'Key: ' + str(Key)
-            #mInfo += '  Key: ' + str(Key)
+            # mInfo += '  Key: ' + str(Key)
 
             bytes, Value = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            #mInfo += '  Value: ' + str(Value)
+            # mInfo += '  Value: ' + str(Value)
             # print 'Value: ' + str(Value)
             # print mInfo
 
-            if Key == 0x2D: #cpufreq
+            if Key == 0x2D:  # cpufreq
                 outbuf.cpufreq_lock.acquire()
 
                 if Value != outbuf.lastCpufreq[Core] and outbuf.lastCpufreq[Core] != -1:
-                    outbuf.cpufreq[Core * 2].append(outbuf.lastCpufreq[Core]/1000000)
+                    outbuf.cpufreq[Core * 2].append(outbuf.lastCpufreq[Core] / 1000000)
                     outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
 
                 outbuf.cpufreq[Core * 2].append(Value / 1000000)
@@ -178,7 +172,7 @@ class Parser(object):
     def handleScheduler(self):
         pass
 
-    def  handleIdle(self):
+    def handleIdle(self):
         pass
 
     def handleExternal(self):
@@ -189,4 +183,3 @@ class Parser(object):
 
     def handleActivity(self):
         pass
-
