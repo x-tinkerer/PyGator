@@ -3,6 +3,7 @@ import Queue
 import threading
 import time
 
+
 class CpuFreqData(object):
     def __init__(self, num):
         self.cpufreq_lock = threading.Lock()
@@ -11,11 +12,13 @@ class CpuFreqData(object):
         self.lastCpufreq = [-1 for i in range(num)]
         self.lastFreqts = [-1 for i in range(num)]
 
+
 class CpuUsageData(object):
     def __init__(self, num):
         self.cpuusag_lock = threading.Lock()
         # [sys[0],user[0], ... , sys[9],user[9]]
         self.usage = [[] for i in range(num * 2)]
+
 
 class GpuFreqData(object):
     def __init__(self):
@@ -23,29 +26,32 @@ class GpuFreqData(object):
         self.gpufreq_lock = threading.Lock()
         self.gpufreq = [[], []]
 
+
 class FpsData(object):
     def __init__(self):
         # fps[0], ts[0]
         self.fps_lock = threading.Lock()
         self.fps = [[], []]
 
+
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
     def __init__(self, num):
-        self.cpunum =num
+        self.cpunum = num
         CpuFreqData.__init__(num)
         CpuUsageData.__init__(num)
         GpuFreqData.__init__()
         FpsData.__init__()
+
 
 class Buffer(object):
     """Receive data for phone and then
     1. save pac as file
     2. pass data to parser to analyses buff.
     """
-    mCon = None     # socket connector
-    mPar = None     # parser
-    mData = None    # receive buff
-    mFifo = None    # get
+    mCon = None  # socket connector
+    mPar = None  # parser
+    mData = None  # receive buff
+    mFifo = None  # get
     mAPC = None
     mSize = 0
     mRecv_Thread = None
@@ -98,7 +104,7 @@ class Buffer(object):
                 self.rstatus = 1
                 self.mAPC.writeApc(self.mData)
                 # print 'Recv ' + str(num) + 'bytes from gatord'
-                if self.pstatus ==0:
+                if self.pstatus == 0:
                     self.pstatus = 1
                 self.fifo_mutex.acquire()
                 for index in range(0, num):
@@ -127,7 +133,7 @@ class Buffer(object):
         self.cur_head = bytearray()
         for i in range(0, 5):
             self.cur_head.append(self.mFifo.get())
-        #print repr(self.cur_head)
+        # print repr(self.cur_head)
         btype = self.cur_head[0]
         s1 = self.cur_head[1]
         s2 = self.cur_head[2] << 8
@@ -214,5 +220,3 @@ class Buffer(object):
         self.mRecv_Thread.start()
         # self.mProc_Thread.setDaemon(True)
         self.mProc_Thread.start()
-
-

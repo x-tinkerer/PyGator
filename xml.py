@@ -2,6 +2,7 @@ from lxml import etree
 import os
 import struct
 
+
 class Xml(object):
     xname = None
     cmmd_buff = None
@@ -43,7 +44,7 @@ class Xml(object):
     def recv_response(self):
         """Receive data to buff."""
         self.resp = self.mCon.recv_buff(5)
-        #print repr(self.resp)
+        # print repr(self.resp)
 
     def recv_head(self):
         """Receive data to buff."""
@@ -53,16 +54,17 @@ class Xml(object):
         size, = struct.unpack('I', self.head[1:])
         self.buftype = type
         self.bufsize = size
-        #print 'Recv Size ' + str(size)
+        # print 'Recv Size ' + str(size)
 
     def recv_body(self):
         """Receive data to buff."""
         self.body = self.mCon.recv_buff(self.bufsize)
-        #print 'Recv ' + self.body
+        # print 'Recv ' + self.body
 
     def clean(slef):
         if (os.path.exists(slef.xName)):
             return os.remove(slef.xName)
+
 
 class SessionXML(Xml):
     def __init__(self, con, name='session.xml'):
@@ -92,14 +94,15 @@ class SessionXML(Xml):
                                114, 103, 121, 95, 99, 97, 112, 116, 117, 114, 101, 62, 10, 60, 47, 115,
                                101, 115, 115, 105, 111, 110, 62, 10])
 
+
 class EventsXML(Xml):
     def __init__(self, con, name='events.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 64, 0, 0, 0,  # HEAD
-                                  60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
-                                  46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
-                                  70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
-                                  116, 121, 112, 101, 61, 34, 101, 118, 101, 110, 116, 115, 34, 47, 62, 10])
+                                    60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
+                                    46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
+                                    70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
+                                    116, 121, 112, 101, 61, 34, 101, 118, 101, 110, 116, 115, 34, 47, 62, 10])
 
     # TODO:
     # counter set add
@@ -111,8 +114,8 @@ class EventsXML(Xml):
             if category.tag == 'category':
                 name = category.get('name')
                 per_cpu = category.get('per_cpu')
-                if per_cpu ==None:
-                        per_cpu = 'No'
+                if per_cpu == None:
+                    per_cpu = 'No'
                 # print 'Category name:' + name + '  Per_cpu:' + per_cpu
                 for events in category:
                     event = events.get('event')
@@ -126,18 +129,19 @@ class EventsXML(Xml):
                     if counter:
                         print 'counter: ' + counter
 
-                    # print 'title:' + title \
-                    #     + '   name:' + name + '\n description:' + description
+                        # print 'title:' + title \
+                        #     + '   name:' + name + '\n description:' + description
+
 
 class CountersXML(Xml):
     def __init__(self, con, name='events.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 66, 0, 0, 0,  # HEAD
-                                  60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
-                                  46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
-                                  70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
-                                  116, 121, 112, 101, 61, 34, 99, 111, 117, 110, 116, 101, 114, 115, 34, 47,
-                                  62, 10])
+                                    60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
+                                    46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
+                                    70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
+                                    116, 121, 112, 101, 61, 34, 99, 111, 117, 110, 116, 101, 114, 115, 34, 47,
+                                    62, 10])
 
     def countersXML(buff):
         tree = etree.parse(buff)
@@ -146,18 +150,18 @@ class CountersXML(Xml):
         for counter in root:
             if counter.tag == 'counter':
                 name = counter.get('name')
-                #print 'Name:' + name
+                # print 'Name:' + name
 
 
 class CapturedXML(Xml):
     def __init__(self, con, name='captured.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 66, 0, 0, 0,  # HEAD
-                                  60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
-                                  46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
-                                  70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
-                                  116, 121, 112, 101, 61, 34, 99, 97, 112, 116, 117, 114, 101, 100, 34, 47,
-                                  62, 10])
+                                    60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
+                                    46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
+                                    70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
+                                    116, 121, 112, 101, 61, 34, 99, 97, 112, 116, 117, 114, 101, 100, 34, 47,
+                                    62, 10])
 
     def capturedXML(buff):
         tree = etree.parse(buff)
@@ -165,7 +169,7 @@ class CapturedXML(Xml):
 
         version = root.get("version")
         protocol = root.get("protocol")
-        #print 'Version:' + version + '   Protocol:' + protocol
+        # print 'Version:' + version + '   Protocol:' + protocol
 
         for article in root:
             if article.tag == 'target':
@@ -177,11 +181,11 @@ class CapturedXML(Xml):
 
                 # print 'Target:' + name + '\nSample_rate:' + sample_rate + \
                 #      '\nCores:' + cores + ' CPUID:' + cpuid + '\nSupports_live:' + supports_live
-            elif article.tag =='counters':
+            elif article.tag == 'counters':
                 for counter in article:
                     key = counter.get('key')
                     type = counter.get('type')
                     evnet = counter.get('event')
                     if evnet == None:
                         evnet = ""
-                    #print 'Key:' + key + '  Type:' + type + '   Event:' + evnet
+                        # print 'Key:' + key + '  Type:' + type + '   Event:' + evnet

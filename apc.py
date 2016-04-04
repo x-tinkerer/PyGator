@@ -1,5 +1,6 @@
 import os
 
+
 class Apc(object):
     ApcName = None
     mCon = None
@@ -15,7 +16,7 @@ class Apc(object):
             return os.remove(slef.ApcName)
 
     def writeApc(self, buffer):
-        if(len(buffer) > 0):
+        if (len(buffer) > 0):
             target = open(self.ApcName, 'a+')
             target.write(buffer)
             target.close()
