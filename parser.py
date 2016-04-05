@@ -177,7 +177,6 @@ class Parser(object):
 
                 outbuf.gpufreq_lock.release()
 
-
             if Key == 0x31:  # fps
                 outbuf.fps_lock.acquire()
                 ins_index = len(outbuf.fps[1]) - 1
