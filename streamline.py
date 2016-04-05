@@ -33,7 +33,6 @@ class MyMplCanvas(FigureCanvas):
 
         self.compute_initial_figure()
 
-        #
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
 
@@ -60,6 +59,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
+
         xminlimit = 0
         xmaxlimit = 20000
         if self.sl.status > 0:
@@ -83,6 +83,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
             self.sl.mBuf.mDisplayData.cpufreq_lock.release()
 
         # Show GPU FREQ
+
         self.sl.mBuf.mDisplayData.gpufreq_lock.acquire()
         xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[1])
         ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[0])
@@ -95,6 +96,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.sl.mBuf.mDisplayData.fps_lock.acquire()
         xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
         yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
+
         self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
         self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
         self.axes[self.plotnum + 1].set_ylim(0, 60)

@@ -159,6 +159,7 @@ class Parser(object):
                 outbuf.lastcpufreq[Core] = Value
                 outbuf.cpufreq_lock.release()
 
+
             if Key == 0x2F:  # gpufreq
                 outbuf.gpufreq_lock.acquire()
 
