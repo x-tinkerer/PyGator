@@ -149,19 +149,38 @@ class Parser(object):
             # print 'Value: ' + str(Value)
             # print mInfo
 
+            # TODO: Need get key from captured xml.
             if Key == 0x2D:  # cpufreq
                 outbuf.cpufreq_lock.acquire()
 
-                if Value != outbuf.lastCpufreq[Core] and outbuf.lastCpufreq[Core] != -1:
-                    outbuf.cpufreq[Core * 2].append(outbuf.lastCpufreq[Core] / 1000000)
+                if Value != outbuf.lastcpufreq[Core] and outbuf.lastcpufreq[Core] != -1:
+                    outbuf.cpufreq[Core * 2].append(outbuf.lastcpufreq[Core] / 1000000)
                     outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
 
                 outbuf.cpufreq[Core * 2].append(Value / 1000000)
                 outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
 
-                outbuf.lastCpufreq[Core] = Value
-                outbuf.lastFreqts[Core] = Timestamp / 1000000
+                outbuf.lastcpufreq[Core] = Value
                 outbuf.cpufreq_lock.release()
+
+            if Key == 0x2E:  # gpufreq
+                outbuf.gpufreq_lock.acquire()
+
+                if Value != outbuf.lastgpufreq and outbuf.lastgpufreq != -1:
+                    outbuf.gpufreq[0].append(outbuf.lastgpufreq / 1000000)
+                    outbuf.gpufreq[1].append(Timestamp / 1000000)
+
+                outbuf.gpufreq[0].append(Value / 1000000)
+                outbuf.gpufreq[1].append(Timestamp / 1000000)
+
+                outbuf.lastgpufreq = Value
+                outbuf.gpufreq_lock.release()
+
+            if Key == 0x2F:  # fps
+                outbuf.fps_lock.acquire()
+                outbuf.fps[0].append(Value)
+                outbuf.fps[1].append(Timestamp / 1000000)
+                outbuf.fps_lock.release()
 
     def handleBlock(self):
         pass
