@@ -149,7 +149,7 @@ class MainForm(QtGui.QMainWindow):
     def add_plot(self):
         self.main_widget = QtGui.QWidget(self)
         self.layout = QtGui.QVBoxLayout(self.main_widget)
-        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=1)
+        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=8)
         self.layout.addWidget(self.dc)
 
         self.main_widget.setFocus()

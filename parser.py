@@ -149,37 +149,47 @@ class Parser(object):
             if Key == 0x2D:  # cpufreq
                 outbuf.cpufreq_lock.acquire()
 
-                if Value != outbuf.lastcpufreq[Core] and outbuf.lastcpufreq[Core] != -1:
-                    outbuf.cpufreq[Core * 2].append(outbuf.lastcpufreq[Core] / 1000000)
+                ins_index = len(outbuf.cpufreq[Core * 2 + 1]) - 1
+                if ins_index < 0:
+                    outbuf.cpufreq[Core * 2].append(Value / 1000000)
                     outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+                else:
+                    while ins_index >= 0 and outbuf.cpufreq[Core * 2 + 1][ins_index] > Timestamp / 1000000:
+                        ins_index -= 1
 
-                outbuf.cpufreq[Core * 2].append(Value / 1000000)
-                outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+                    outbuf.cpufreq[Core * 2].insert(ins_index + 1, Value / 1000000)
+                    outbuf.cpufreq[Core * 2 + 1].insert(ins_index + 1, Timestamp / 1000000)
 
-                outbuf.lastcpufreq[Core] = Value
                 outbuf.cpufreq_lock.release()
-
 
             if Key == 0x2F:  # gpufreq
                 outbuf.gpufreq_lock.acquire()
 
-                if Value != outbuf.lastgpufreq and outbuf.lastgpufreq != -1:
-                    outbuf.gpufreq[0].append(outbuf.lastgpufreq / 1000000)
+                ins_index = len(outbuf.gpufreq[1]) - 1
+                if ins_index < 0:
+                    outbuf.gpufreq[0].append(Value / 1000000)
                     outbuf.gpufreq[1].append(Timestamp / 1000000)
+                else:
+                    while ins_index >= 0 and outbuf.gpufreq[1][ins_index] > Timestamp / 1000000:
+                        ins_index -= 1
+                    outbuf.gpufreq[0].insert(ins_index + 1, Value / 1000000)
+                    outbuf.gpufreq[1].insert(ins_index + 1, Timestamp / 1000000)
 
-                outbuf.gpufreq[0].append(Value / 1000000)
-                outbuf.gpufreq[1].append(Timestamp / 1000000)
-
-                outbuf.lastgpufreq = Value
                 outbuf.gpufreq_lock.release()
+
 
             if Key == 0x31:  # fps
                 outbuf.fps_lock.acquire()
-                outbuf.fps[0].append(Value)
-                outbuf.fps[1].append(Timestamp / 1000000)
+                ins_index = len(outbuf.fps[1]) - 1
+                if ins_index < 0:
+                    outbuf.fps[0].append(Value / 1000000)
+                    outbuf.fps[1].append(Timestamp / 1000000)
+                else:
+                    while ins_index >= 0 and outbuf.fps[1][ins_index] > Timestamp / 1000000:
+                        ins_index -= 1
+                    outbuf.fps[0].insert(ins_index + 1, Value / 1000000)
+                    outbuf.fps[1].insert(ins_index + 1, Timestamp / 1000000)
                 outbuf.fps_lock.release()
-
-            outbuf.lastts = Timestamp / 1000000
 
     def handleBlock(self):
         pass
