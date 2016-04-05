@@ -53,7 +53,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         self.updatetimer = QtCore.QTimer(self)
         self.updatetimer.timeout.connect(self.update_figure)
-        self.updatetimer.start(1000)
+        self.updatetimer.start(2000)
 
     def compute_initial_figure(self):
         for i in range(self.plotnum + 2):
@@ -65,9 +65,9 @@ class MyDynamicMplCanvas(MyMplCanvas):
         if self.sl.status > 0:
             self.sl.mBuf.mDisplayData.cpufreq_lock.acquire()
             # X is bigger than 20 sec.
-            if self.sl.mBuf.mDisplayData.lastFreqts[0] > 20000:
-                xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[0] - 20000
-                xmaxlimit = self.sl.mBuf.mDisplayData.lastFreqts[0]
+            if self.sl.mBuf.mDisplayData.lastts > 20000:
+                xminlimit = self.sl.mBuf.mDisplayData.lastts - 20000
+                xmaxlimit = self.sl.mBuf.mDisplayData.lastts
             else:
                 xminlimit = 0
                 xmaxlimit = 20000
@@ -97,7 +97,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
         self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
         self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
-        self.axes[self.plotnum + 1].set_ylim(0, 850)
+        self.axes[self.plotnum + 1].set_ylim(0, 60)
         self.sl.mBuf.mDisplayData.fps_lock.release()
 
         self.draw()
@@ -146,9 +146,9 @@ class MainForm(QtGui.QMainWindow):
 
     def add_plot(self):
         self.main_widget = QtGui.QWidget(self)
-        layout = QtGui.QVBoxLayout(self.main_widget)
-        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=10)
-        layout.addWidget(self.dc)
+        self.layout = QtGui.QVBoxLayout(self.main_widget)
+        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=1)
+        self.layout.addWidget(self.dc)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)

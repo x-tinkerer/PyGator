@@ -131,22 +131,18 @@ class Parser(object):
             bytes, Timestamp = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
             # mInfo += 'Timestamp:' + str(Timestamp)
-            # print 'Timestamp: ' + str(Timestamp)
 
             bytes, Core = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
             # mInfo += '  Core: ' + str(Core)
-            # print 'Core: ' + str(Core)
 
             bytes, Key = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
-            # print 'Key: ' + str(Key)
             # mInfo += '  Key: ' + str(Key)
 
             bytes, Value = self.unpackInt64(inbuf[mPos:])
             mPos += bytes
             # mInfo += '  Value: ' + str(Value)
-            # print 'Value: ' + str(Value)
             # print mInfo
 
             # TODO: Need get key from captured xml.
@@ -163,7 +159,7 @@ class Parser(object):
                 outbuf.lastcpufreq[Core] = Value
                 outbuf.cpufreq_lock.release()
 
-            if Key == 0x2E:  # gpufreq
+            if Key == 0x2F:  # gpufreq
                 outbuf.gpufreq_lock.acquire()
 
                 if Value != outbuf.lastgpufreq and outbuf.lastgpufreq != -1:
@@ -176,11 +172,13 @@ class Parser(object):
                 outbuf.lastgpufreq = Value
                 outbuf.gpufreq_lock.release()
 
-            if Key == 0x2F:  # fps
+            if Key == 0x31:  # fps
                 outbuf.fps_lock.acquire()
                 outbuf.fps[0].append(Value)
                 outbuf.fps[1].append(Timestamp / 1000000)
                 outbuf.fps_lock.release()
+
+            outbuf.lastts = Timestamp / 1000000
 
     def handleBlock(self):
         pass

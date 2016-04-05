@@ -37,8 +37,9 @@ class FpsData(object):
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
     def __init__(self, num):
         self.cpunum = num
-        CpuFreqData.__init__(self,num)
-        CpuUsageData.__init__(self,num)
+        self.lastts = -1
+        CpuFreqData.__init__(self, num)
+        CpuUsageData.__init__(self, num)
         GpuFreqData.__init__(self)
         FpsData.__init__(self)
 
