@@ -9,8 +9,7 @@ class CpuFreqData(object):
         self.cpufreq_lock = threading.Lock()
         # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
         self.cpufreq = [[] for i in range(num * 2)]
-        self.lastCpufreq = [-1 for i in range(num)]
-        self.lastFreqts = [-1 for i in range(num)]
+        self.lastcpufreq = [-1 for i in range(num)]
 
 
 class CpuUsageData(object):
@@ -25,6 +24,7 @@ class GpuFreqData(object):
         # freq[0], ts[0]
         self.gpufreq_lock = threading.Lock()
         self.gpufreq = [[], []]
+        self.lastgpufreq = -1
 
 
 class FpsData(object):
@@ -37,10 +37,10 @@ class FpsData(object):
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
     def __init__(self, num):
         self.cpunum = num
-        CpuFreqData.__init__(num)
-        CpuUsageData.__init__(num)
-        GpuFreqData.__init__()
-        FpsData.__init__()
+        CpuFreqData.__init__(self,num)
+        CpuUsageData.__init__(self,num)
+        GpuFreqData.__init__(self)
+        FpsData.__init__(self)
 
 
 class Buffer(object):
@@ -90,7 +90,7 @@ class Buffer(object):
         self.mFifo = Queue.Queue(fsize)
         self.fifo_mutex = threading.Lock()
 
-        self.mDisplayData = CpuFreqData(10)
+        self.mDisplayData = DisplayData(10)
 
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
         self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')

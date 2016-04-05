@@ -1,11 +1,9 @@
 import sys
 import time
-
 import xml
 import apc
 import buffer
 import connector
-
 from matplotlib.backends import qt_compat
 
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
@@ -26,9 +24,12 @@ class MyMplCanvas(FigureCanvas):
 
         self.axes = []
         for i in range(subs):
-            self.axes.append(fig.add_subplot(subs, 1, i + 1))
+            self.axes.append(fig.add_subplot(subs + 2, 1, i + 1))  # For CPU CORES
             # We want the axes cleared every time plot() is called
             self.axes[i].hold(False)
+
+        self.axes.append(fig.add_subplot(subs + 2, 1, subs + 1))  # FOR GPU
+        self.axes.append(fig.add_subplot(subs + 2, 1, subs + 2))  # FOR FPS
 
         self.compute_initial_figure()
 
@@ -55,26 +56,51 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
-        for i in range(self.plotnum):
+        for i in range(self.plotnum + 2):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
-        if (self.sl.status > 0):
+        xminlimit = 0
+        xmaxlimit = 20000
+        if self.sl.status > 0:
             self.sl.mBuf.mDisplayData.cpufreq_lock.acquire()
+            # X is bigger than 20 sec.
+            if self.sl.mBuf.mDisplayData.lastFreqts[0] > 20000:
+                xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[0] - 20000
+                xmaxlimit = self.sl.mBuf.mDisplayData.lastFreqts[0]
+            else:
+                xminlimit = 0
+                xmaxlimit = 20000
+
+            # Show CPU FREQ
             for i in range(self.plotnum):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i + 1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i])
                 self.axes[i].plot(x, y, 'g')
-                if self.sl.mBuf.mDisplayData.lastFreqts[i] > 20000:
-                    xminlimit = self.sl.mBuf.mDisplayData.lastFreqts[i] - 20000
-                    xmaxlimit = self.sl.mBuf.mDisplayData.lastFreqts[i]
-                else:
-                    xminlimit = 0
-                    xmaxlimit = 20000
+
                 self.axes[i].set_xlim(xminlimit, xmaxlimit)
                 self.axes[i].set_ylim(0, 2500)
-            self.draw()
             self.sl.mBuf.mDisplayData.cpufreq_lock.release()
+
+        # Show GPU FREQ
+        self.sl.mBuf.mDisplayData.gpufreq_lock.acquire()
+        xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[1])
+        ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[0])
+        self.axes[self.plotnum].plot(xgpu, ygpu, 'r')
+        self.axes[self.plotnum].set_xlim(xminlimit, xmaxlimit)
+        self.axes[self.plotnum].set_ylim(0, 850)
+        self.sl.mBuf.mDisplayData.gpufreq_lock.release()
+
+        # Show FPS
+        self.sl.mBuf.mDisplayData.fps_lock.acquire()
+        xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
+        yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
+        self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
+        self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
+        self.axes[self.plotnum + 1].set_ylim(0, 850)
+        self.sl.mBuf.mDisplayData.fps_lock.release()
+
+        self.draw()
 
     def stop_timer(self):
         self.updatetimer.stop()
