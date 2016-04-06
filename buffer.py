@@ -111,7 +111,8 @@ class Buffer(object):
     mCon = None  # socket connector
     mPar = None  # parser
     mData = None  # receive buff
-    mFifo = None  # get
+    mFifo = None  #
+    mBuff = None
     mAPC = None
     mSize = 0
     mRecv_Thread = None
@@ -141,24 +142,28 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, apc, size=10240, fsize=4 * 1024 * 1024):
+    def __init__(self, con, apc, buff_size=1024 * 1024 * 20, sock_size=200 * 1024, fifo_size=1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
         self.mAPC = apc
-        self.mSize = size
+        self.sSize = sock_size
+        self.bSize = buff_size
+        self.mBuff = Queue.Queue(buff_size)
         self.mPar = parser.Parser(self.cur_buff)
-        self.mFifo = Queue.Queue(fsize)
+        self.mFifo = Queue.Queue(fifo_size)
         self.fifo_mutex = threading.Lock()
+        self.buff_mutex = threading.Lock()
 
         self.mDisplayData = DisplayData(10)
 
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
+        self.mtran_Thread = threading.Thread(target=self.th_transfer, args=(), name='gt-tran')
         self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')
 
     def th_receive(self):
         while self.mActivity or self.rstatus:
             # Receive Data
-            self.mData = self.mCon.recv_buff(self.mSize)
+            self.mData = self.mCon.recv_buff(self.sSize)
             num = len(self.mData)
             if num > 0:
                 self.rstatus = 1
@@ -167,32 +172,48 @@ class Buffer(object):
                 if self.pstatus == 0:
                     self.pstatus = 1
                 self.fifo_mutex.acquire()
-                for index in range(0, num):
-                    self.mFifo.put(self.mData[index])
+                self.mFifo.put(self.mData)
                 self.fifo_mutex.release()
             else:
                 time.sleep(0.1)
                 self.rstatus = 0
 
-    def th_process(self):
-        while self.mActivity or self.pstatus:
+    def th_transfer(self):
+        while self.mActivity or self.mFifo.not_empty:
             if self.mFifo.empty():
                 time.sleep(0.1)
-                self.pstatus = 0
             else:
                 self.fifo_mutex.acquire()
-                # Parse and collection
-                if self.pstatus == 1 and self.mFifo.qsize() > 5:
-                    self.process_head()
-                if self.pstatus == 2 and self.mFifo.qsize() >= self.cur_buff_size:
-                    self.process_body()
+                tmpbuf = self.mFifo.get()
                 self.fifo_mutex.release()
+
+                self.buff_mutex.acquire()
+                if self.bSize - self.mBuff.qsize() < len(tmpbuf):
+                    time.sleep(0.01)
+                else:
+                    for i in range(len(tmpbuf)):
+                        self.mBuff.put(tmpbuf[i])
+                self.buff_mutex.release()
+
+    def th_process(self):
+        while self.mActivity or self.mBuff.not_empty:
+            # Parse and collection
+            self.buff_mutex.acquire()
+            if self.pstatus == 1 and self.mBuff.qsize() > 5:
+                self.process_head()
+                self.buff_mutex.release()
+            elif self.pstatus == 2 and self.mBuff.qsize() >= self.cur_buff_size:
+                self.process_body()
+                self.buff_mutex.release()
+            else:
+                self.pstatus = 0
+                time.sleep(0.01)
 
     def process_head(self):
         """Receive data to buff."""
         self.cur_head = bytearray()
         for i in range(0, 5):
-            self.cur_head.append(self.mFifo.get())
+            self.cur_head.append(self.mBuff.get())
         # print repr(self.cur_head)
         btype = self.cur_head[0]
         s1 = self.cur_head[1]
@@ -210,7 +231,7 @@ class Buffer(object):
         """Receive data to buff."""
         self.cur_buff = bytearray()
         for i in range(0, self.cur_buff_size):
-            self.cur_buff.append(self.mFifo.get())
+            self.cur_buff.append(self.mBuff.get())
         # print 'Body: ' + repr(self.cur_buff)
 
         ###############################################
@@ -279,4 +300,5 @@ class Buffer(object):
         # self.mRecv_Thread.setDaemon(True)
         self.mRecv_Thread.start()
         # self.mProc_Thread.setDaemon(True)
+        self.mtran_Thread.start()
         self.mProc_Thread.start()
