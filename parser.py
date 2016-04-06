@@ -190,6 +190,8 @@ class Parser(object):
                     outbuf.fps[1].insert(ins_index + 1, Timestamp / 1000000)
                 outbuf.fps_lock.release()
 
+            outbuf.lastts = Timestamp/1000000
+
     def handleBlock(self):
         pass
 

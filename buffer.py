@@ -9,6 +9,8 @@ class CpuFreqData(object):
         self.cpufreq_lock = threading.Lock()
         # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
         self.cpufreq = [[] for i in range(num * 2)]
+        self.cpufreqmod = [[] for i in range(num * 2)]
+        self.cpufreqshow = [[] for i in range(num * 2)]
         self.lastcpufreq = [-1 for i in range(num)]
 
 
@@ -24,6 +26,8 @@ class GpuFreqData(object):
         # freq[0], ts[0]
         self.gpufreq_lock = threading.Lock()
         self.gpufreq = [[], []]
+        self.gpufreqmod = [[], []]
+        self.gpufreqshow = [[], []]
         self.lastgpufreq = -1
 
 
@@ -42,6 +46,57 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
         CpuUsageData.__init__(self, num)
         GpuFreqData.__init__(self)
         FpsData.__init__(self)
+
+    def cut_window_array(self):
+        """
+        From CPU/GPU freq,ts array, get the last 20ms data
+        """
+        self.cpufreq_lock.acquire()
+        # Every CPU have [[freq],[ts], ...[],[]]
+        for i in range(self.cpunum):
+            start_index = len(self.cpufreq[2 * i + 1]) - 1
+            if self.lastts > 20000:
+                while start_index >= 0 and self.cpufreq[2 * i + 1][start_index] > (self.lastts - 20000):
+                    start_index -= 1
+                for x in [0, 1]:  # [freq],[ts]
+                    self.cpufreqmod[2 * i + x] = self.cpufreq[2 * i + x][start_index:]
+                    # self.cpufreqmod[2 * i + x] = self.cpufreq[2 * i + x][0:]
+        self.cpufreq_lock.release()
+
+        self.gpufreq_lock.acquire()
+        start_index = len(self.gpufreq[1]) - 1
+        if self.lastts > 20000:
+            while start_index >= 0 and self.gpufreq[1][start_index] > (self.lastts - 20000):
+                start_index -= 1
+            for i in [0, 1]:
+                self.gpufreqmod[i] = self.gpufreq[i][start_index:]
+                #self.gpufreqmod[i] = self.gpufreq[i][0:]
+        self.gpufreq_lock.release()
+
+    def finish_window_array(self):
+        """
+        Add some extra point to the window array, so let show square wave.
+        """
+        for i in range(self.cpunum):
+            self.cpufreqshow[2 * i] = []
+            self.cpufreqshow[2 * i + 1] = []
+            for index in range(len(self.cpufreqmod[2 * i])):  # cpu i freq value list length
+                if index > 0 and self.cpufreqmod[2 * i][index] != self.cpufreqmod[2 * i][index - 1]:
+                    self.cpufreqshow[2 * i].append(self.cpufreqmod[2 * i][index - 1])  # add pre freq
+                    self.cpufreqshow[2 * i + 1].append(self.cpufreqmod[2 * i + 1][index])  # add current ts
+
+                self.cpufreqshow[2 * i].append(self.cpufreqmod[2 * i][index])  # add current freq
+                self.cpufreqshow[2 * i + 1].append(self.cpufreqmod[2 * i + 1][index])  # add current ts
+
+        self.gpufreqshow[0] = []
+        self.gpufreqshow[1] = []
+        for index in range(len(self.gpufreqmod[0])):  # gpu value list length
+            if index > 0 and self.gpufreqmod[0][index] != self.gpufreqmod[0][index - 1]:
+                self.gpufreqshow[0].append(self.gpufreqmod[0][index - 1])  # add pre freq
+                self.gpufreqshow[1].append(self.gpufreqmod[1][index])  # add current ts
+
+            self.gpufreqshow[0].append(self.gpufreqmod[0][index])  # add current freq
+            self.gpufreqshow[1].append(self.gpufreqmod[1][index])  # add current ts
 
 
 class Buffer(object):

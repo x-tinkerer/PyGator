@@ -59,11 +59,10 @@ class MyDynamicMplCanvas(MyMplCanvas):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
-
-        xminlimit = 0
-        xmaxlimit = 20000
         if self.sl.status > 0:
-            self.sl.mBuf.mDisplayData.cpufreq_lock.acquire()
+            self.sl.mBuf.mDisplayData.cut_window_array()
+            self.sl.mBuf.mDisplayData.finish_window_array()
+
             # X is bigger than 20 sec.
             if self.sl.mBuf.mDisplayData.lastts > 20000:
                 xminlimit = self.sl.mBuf.mDisplayData.lastts - 20000
@@ -74,35 +73,29 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
             # Show CPU FREQ
             for i in range(self.plotnum):
-                x = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i + 1])
-                y = np.array(self.sl.mBuf.mDisplayData.cpufreq[2 * i])
+                x = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i + 1])
+                y = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i])
                 self.axes[i].plot(x, y, 'g')
 
                 self.axes[i].set_xlim(xminlimit, xmaxlimit)
                 self.axes[i].set_ylim(0, 2500)
-            self.sl.mBuf.mDisplayData.cpufreq_lock.release()
 
-        # Show GPU FREQ
+            # Show GPU FREQ
+            xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[1])
+            ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[0])
+            self.axes[self.plotnum].plot(xgpu, ygpu, 'r')
+            self.axes[self.plotnum].set_xlim(xminlimit, xmaxlimit)
+            self.axes[self.plotnum].set_ylim(0, 850)
 
-        self.sl.mBuf.mDisplayData.gpufreq_lock.acquire()
-        xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[1])
-        ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreq[0])
-        self.axes[self.plotnum].plot(xgpu, ygpu, 'r')
-        self.axes[self.plotnum].set_xlim(xminlimit, xmaxlimit)
-        self.axes[self.plotnum].set_ylim(0, 850)
-        self.sl.mBuf.mDisplayData.gpufreq_lock.release()
+            # Show FPS
+            xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
+            yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
 
-        # Show FPS
-        self.sl.mBuf.mDisplayData.fps_lock.acquire()
-        xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
-        yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
+            self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
+            self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
+            self.axes[self.plotnum + 1].set_ylim(0, 60)
 
-        self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
-        self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
-        self.axes[self.plotnum + 1].set_ylim(0, 60)
-        self.sl.mBuf.mDisplayData.fps_lock.release()
-
-        self.draw()
+            self.draw()
 
     def stop_timer(self):
         self.updatetimer.stop()
