@@ -169,8 +169,6 @@ class Buffer(object):
                 self.rstatus = 1
                 self.mAPC.writeApc(self.mData)
                 # print 'Recv ' + str(num) + 'bytes from gatord'
-                if self.pstatus == 0:
-                    self.pstatus = 1
                 self.fifo_mutex.acquire()
                 self.mFifo.put(self.mData)
                 self.fifo_mutex.release()
@@ -193,6 +191,9 @@ class Buffer(object):
                 else:
                     for i in range(len(tmpbuf)):
                         self.mBuff.put(tmpbuf[i])
+
+                    if self.pstatus == 0:
+                        self.pstatus = 1
                 self.buff_mutex.release()
 
     def th_process(self):
@@ -206,7 +207,7 @@ class Buffer(object):
                 self.process_body()
                 self.buff_mutex.release()
             else:
-                self.pstatus = 0
+                self.buff_mutex.release()
                 time.sleep(0.01)
 
     def process_head(self):
