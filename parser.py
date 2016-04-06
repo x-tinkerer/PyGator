@@ -181,12 +181,12 @@ class Parser(object):
                 outbuf.fps_lock.acquire()
                 ins_index = len(outbuf.fps[1]) - 1
                 if ins_index < 0:
-                    outbuf.fps[0].append(Value / 1000000)
+                    outbuf.fps[0].append(Value)
                     outbuf.fps[1].append(Timestamp / 1000000)
                 else:
                     while ins_index >= 0 and outbuf.fps[1][ins_index] > Timestamp / 1000000:
                         ins_index -= 1
-                    outbuf.fps[0].insert(ins_index + 1, Value / 1000000)
+                    outbuf.fps[0].insert(ins_index + 1, Value)
                     outbuf.fps[1].insert(ins_index + 1, Timestamp / 1000000)
                 outbuf.fps_lock.release()
 
