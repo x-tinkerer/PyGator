@@ -60,7 +60,9 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
                     start_index -= 1
                 for x in [0, 1]:  # [freq],[ts]
                     self.cpufreqmod[2 * i + x] = self.cpufreq[2 * i + x][start_index:]
-                    # self.cpufreqmod[2 * i + x] = self.cpufreq[2 * i + x][0:]
+            else:
+                for x in [0, 1]:  # [freq],[ts]
+                    self.cpufreqmod[2 * i + x] = self.cpufreq[2 * i + x][0:]
         self.cpufreq_lock.release()
 
         self.gpufreq_lock.acquire()
@@ -70,7 +72,9 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
                 start_index -= 1
             for i in [0, 1]:
                 self.gpufreqmod[i] = self.gpufreq[i][start_index:]
-                #self.gpufreqmod[i] = self.gpufreq[i][0:]
+        else:
+            for i in [0, 1]:
+                self.gpufreqmod[i] = self.gpufreq[i][0:]
         self.gpufreq_lock.release()
 
     def finish_window_array(self):
