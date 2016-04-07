@@ -4,6 +4,7 @@ import xml
 import apc
 import buffer
 import connector
+
 from matplotlib.backends import qt_compat
 
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
@@ -26,11 +27,21 @@ class MyMplCanvas(FigureCanvas):
         for i in range(subs):
             self.axes.append(fig.add_subplot(subs + 2, 1, i + 1))  # For CPU CORES
             # We want the axes cleared every time plot() is called
-            self.axes[i].hold(False)
-
+            self.axes[i].set_title('CPU' + str(i))
+            # self.axes[i].set_xticks([])   # not show x
+            self.axes[i].set_xlim(0, 20000)
+            self.axes[i].set_ylim(0, 2500)
         self.axes.append(fig.add_subplot(subs + 2, 1, subs + 1))  # FOR GPU
         self.axes.append(fig.add_subplot(subs + 2, 1, subs + 2))  # FOR FPS
 
+        self.axes[subs].set_title('GPU')
+        self.axes[subs].set_xlim(0, 20000)
+        self.axes[subs].set_ylim(0, 2500)
+        self.axes[subs + 1].set_title('FPS')
+        self.axes[subs + 1].set_xlim(0, 20000)
+        self.axes[subs + 1].set_ylim(0, 2500)
+
+        fig.set_tight_layout(True)
         self.compute_initial_figure()
 
         FigureCanvas.__init__(self, fig)
@@ -131,7 +142,8 @@ class MainForm(QtGui.QMainWindow):
         fileMenu.addAction(ShowAction)
 
     def initUI(self):
-        self.setGeometry(300, 300, 1600, 900)
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        self.setGeometry(screen)
         self.setWindowTitle('Streamline')
 
         self.creat_menu_bar()
@@ -142,9 +154,8 @@ class MainForm(QtGui.QMainWindow):
     def add_plot(self):
         self.main_widget = QtGui.QWidget(self)
         self.layout = QtGui.QVBoxLayout(self.main_widget)
-        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=20000, height=2500, dpi=50, subs=8)
+        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=800, height=600, dpi=50, subs=8)
         self.layout.addWidget(self.dc)
-
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
 
