@@ -242,7 +242,7 @@ class Streamline(object):
         self.capturedXML.recv_head()
         self.capturedXML.recv_body()
         self.capturedXML.writeXML()
-
+        """
         self.eventsXML.send_comm()
         time.sleep(1)
         self.eventsXML.recv_head()
@@ -254,7 +254,7 @@ class Streamline(object):
         self.countersXML.recv_head()
         self.countersXML.recv_body()
         self.countersXML.writeXML()
-
+        """
     def start(self):
         # 1. Prepare
         self.prepare()

@@ -104,7 +104,6 @@ class EventsXML(Xml):
                                     70, 45, 56, 34, 63, 62, 10, 60, 114, 101, 113, 117, 101, 115, 116, 32,
                                     116, 121, 112, 101, 61, 34, 101, 118, 101, 110, 116, 115, 34, 47, 62, 10])
 
-    # TODO:
     # counter set add
     def eventsXML(buff):
         tree = etree.parse(buff)
