@@ -52,7 +52,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         self.updatetimer = QtCore.QTimer(self)
         self.updatetimer.timeout.connect(self.update_figure)
-        self.updatetimer.start(2000)
+        self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
         for i in range(self.plotnum + 2):
@@ -239,15 +239,6 @@ class Streamline(object):
         self.countersXML.recv_body()
         self.countersXML.writeXML()
 
-    def send_start(self):
-        self.mAPC.send_start()
-        self.mBuf.setActivity(True)
-        self.mBuf.start()
-
-    def send_stop(self):
-        self.mAPC.send_stop()
-        self.mBuf.setActivity(False)
-
     def start(self):
         # 1. Prepare
         self.prepare()
@@ -260,13 +251,15 @@ class Streamline(object):
 
         # 4. Start
         print 'Start Capture'
-        self.send_start()
+        self.mAPC.send_start()
+        self.mBuf.start()
         self.status = 1
 
     def stop(self):
         # 5. Stop
         print 'Stop Capture'
-        self.send_stop()
+        self.mAPC.send_stop()
+        self.mBuf.stop()
         self.status = 2
 
         ################################################

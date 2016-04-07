@@ -3,6 +3,9 @@ import Queue
 import threading
 import time
 
+import collections
+import itertools
+
 
 class CpuFreqData(object):
     def __init__(self, num):
@@ -103,6 +106,32 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
             self.gpufreqshow[1].append(self.gpufreqmod[1][index])  # add current ts
 
 
+class RingBuffer(object):
+    """Ring buffer"""
+
+    def __init__(self, size=4096):
+        self._buf = collections.deque(maxlen=size)
+
+    def put(self, data):
+        """Adds data to the end of the buffer"""
+        self._buf.extend(data)
+
+    def get(self, size):
+        """Retrieves data from the beginning of the buffer"""
+        data = str()
+        for i in xrange(size):
+            data += self._buf.popleft()
+        return data
+
+    def peek(self, size):
+        """\"Peeks\" at the beginning of the buffer (i.e.: retrieves data without removing them from the buffer)"""
+        return str(bytearray(itertools.islice(self._buf, size)))
+
+    def len(self):
+        """Returns the length of the buffer"""
+        return len(self._buf)
+
+
 class Buffer(object):
     """Receive data for phone and then
     1. save pac as file
@@ -148,7 +177,7 @@ class Buffer(object):
         self.mAPC = apc
         self.sSize = sock_size
         self.bSize = buff_size
-        self.mBuff = Queue.Queue(buff_size)
+        self.mBuff = RingBuffer(buff_size)
         self.mPar = parser.Parser(self.cur_buff)
         self.mFifo = Queue.Queue(fifo_size)
         self.fifo_mutex = threading.Lock()
@@ -159,6 +188,8 @@ class Buffer(object):
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
         self.mtran_Thread = threading.Thread(target=self.th_transfer, args=(), name='gt-tran')
         self.mProc_Thread = threading.Thread(target=self.th_process, args=(), name='gt-proc')
+
+        self.exit_count = 0
 
     def th_receive(self):
         while self.mActivity or self.rstatus:
@@ -173,48 +204,51 @@ class Buffer(object):
                 self.mFifo.put(self.mData)
                 self.fifo_mutex.release()
             else:
-                time.sleep(0.1)
+                time.sleep(0.01)
                 self.rstatus = 0
 
     def th_transfer(self):
-        while self.mActivity or self.mFifo.not_empty:
+        while self.mActivity or self.mFifo.qsize() > 0:
             if self.mFifo.empty():
-                time.sleep(0.1)
+                time.sleep(0.01)
             else:
                 self.fifo_mutex.acquire()
                 tmpbuf = self.mFifo.get()
                 self.fifo_mutex.release()
 
                 self.buff_mutex.acquire()
-                if self.bSize - self.mBuff.qsize() < len(tmpbuf):
+                if self.bSize - self.mBuff.len() < len(tmpbuf):
                     time.sleep(0.01)
                 else:
-                    for i in range(len(tmpbuf)):
-                        self.mBuff.put(tmpbuf[i])
+                    self.mBuff.put(tmpbuf)
 
                     if self.pstatus == 0:
                         self.pstatus = 1
                 self.buff_mutex.release()
 
     def th_process(self):
-        while self.mActivity or self.mBuff.not_empty:
+        while self.mActivity or self.mBuff.len() > 0:
             # Parse and collection
             self.buff_mutex.acquire()
-            if self.pstatus == 1 and self.mBuff.qsize() > 5:
+            if self.pstatus == 1 and self.mBuff.len() >= 5:
                 self.process_head()
                 self.buff_mutex.release()
-            elif self.pstatus == 2 and self.mBuff.qsize() >= self.cur_buff_size:
+            elif self.pstatus == 2 and self.mBuff.len() >= self.cur_buff_size:
                 self.process_body()
                 self.buff_mutex.release()
             else:
                 self.buff_mutex.release()
-                time.sleep(0.01)
+                if self.mActivity == False:
+                    self.exit_count += 1
+                if self.exit_count > 30:  # 3 sec
+                    break
+                time.sleep(0.1)
 
     def process_head(self):
         """Receive data to buff."""
         self.cur_head = bytearray()
         for i in range(0, 5):
-            self.cur_head.append(self.mBuff.get())
+            self.cur_head.append(self.mBuff.get(1))
         # print repr(self.cur_head)
         btype = self.cur_head[0]
         s1 = self.cur_head[1]
@@ -232,7 +266,7 @@ class Buffer(object):
         """Receive data to buff."""
         self.cur_buff = bytearray()
         for i in range(0, self.cur_buff_size):
-            self.cur_buff.append(self.mBuff.get())
+            self.cur_buff.append(self.mBuff.get(1))
         # print 'Body: ' + repr(self.cur_buff)
 
         ###############################################
@@ -293,13 +327,16 @@ class Buffer(object):
 
         self.pstatus = 1
 
-    def setActivity(self, act):
-        self.mActivity = act
-
     def start(self):
         """Performs operation blah."""
-        # self.mRecv_Thread.setDaemon(True)
+        self.mActivity = True
+
+        self.mRecv_Thread.setDaemon(True)
         self.mRecv_Thread.start()
-        # self.mProc_Thread.setDaemon(True)
+        self.mtran_Thread.setDaemon(True)
         self.mtran_Thread.start()
+        self.mProc_Thread.setDaemon(True)
         self.mProc_Thread.start()
+
+    def stop(self):
+        self.mActivity = False
