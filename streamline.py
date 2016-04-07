@@ -160,7 +160,12 @@ class MainForm(QtGui.QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def closeEvent(self, event):
-        pass
+
+        if self.mActivity == True:
+            QtGui.QMessageBox.question(self, 'Message', "Please STOP capture first!")
+            event.ignore()
+        else:
+            event.accept()
 
     def startCapture(self):
         if self.mActivity == False:
