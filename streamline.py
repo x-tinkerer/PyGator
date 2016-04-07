@@ -179,8 +179,10 @@ class MainForm(QtGui.QMainWindow):
             self.mActivity = False
 
     def showCalc(self):
-        pass
+        self.clac_widget = QtGui.QWidget(self)
+        self.layout.removeWidget(self.dc)
 
+        self.dcc = MyDynamicMplCanvas(self.sl, self.main_widget, width=800, height=600, dpi=50, subs=8)
 
 class Streamline(object):
     """Receive data for phone and then
