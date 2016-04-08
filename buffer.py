@@ -16,6 +16,9 @@ class CpuFreqData(object):
         self.cpufreqshow = [[] for i in range(num * 2)]
         self.lastcpufreq = [-1 for i in range(num)]
 
+        # For calc
+        self.cpuinfo = [{} for x in range(num)]
+
 
 class CpuUsageData(object):
     def __init__(self, num):
@@ -33,6 +36,9 @@ class GpuFreqData(object):
         self.gpufreqshow = [[], []]
         self.lastgpufreq = -1
 
+        # For calc
+        self.gpuinfo = {}
+
 
 class FpsData(object):
     def __init__(self):
@@ -49,6 +55,49 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
         CpuUsageData.__init__(self, num)
         GpuFreqData.__init__(self)
         FpsData.__init__(self)
+
+    def calc_cpu_freq_list(self):
+        """
+        Calc cpu each freq value use time.
+        """
+        num = self.cpunum
+        for cpu in range(num):
+            lastkey = -1
+            lastts = -1
+            for index, value in enumerate(self.cpufreq[cpu * 2]):  # this is freq
+                ts = self.cpufreq[cpu * 2 + 1][index]  # this is time
+
+                if not self.cpuinfo[cpu].has_key(value):
+                    self.cpuinfo[cpu][value] = 0
+
+                if lastkey != -1:
+                    delta_time = ts - lastts
+                    old_total = self.cpuinfo[cpu].get(lastkey)
+                    self.cpuinfo[cpu][lastkey] = old_total + delta_time
+
+                lastkey = value
+                lastts = ts
+
+    def calc_gpu_freq_list(self):
+        """
+        Calc cpu each freq value use time.
+        """
+
+        lastkey = -1
+        lastts = -1
+        for index, value in enumerate(self.gpufreq[0]):  # this is freq
+            ts = self.gpufreq[1][index]  # this is time
+
+            if not self.gpuinfo.has_key(value):
+                self.gpuinfo[value] = 0
+
+            if lastkey != -1:
+                delta_time = ts - lastts
+                old_total = self.gpuinfo.get(lastkey)
+                self.gpuinfo[lastkey] = old_total + delta_time
+
+            lastkey = value
+            lastts = ts
 
     def cut_window_array(self):
         """

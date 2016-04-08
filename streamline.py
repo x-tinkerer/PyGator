@@ -55,45 +55,6 @@ class MyMplCanvas(FigureCanvas):
     def compute_initial_figure(self):
         pass
 
-class MyStaticMplCanvas(FigureCanvas):
-    """Simple canvas with a sine plot."""
-    def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
-        fig1 = Figure(figsize=(width, height), dpi=dpi)
-        self.plotnum = subs
-        self.sl = streamline
-        self.axes = []
-
-        labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
-        sizes = [15, 30, 45, 10]
-        colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral']
-        explode = (0, 0.1, 0, 0) # only "explode" the 2nd slice (i.e. 'Hogs')
-
-        for i in range(subs):
-            self.axes.append(fig1.add_subplot(subs + 2, 1, i + 1))
-            self.axes[i].pie(sizes, explode=explode, labels=labels, colors=colors,
-                    autopct='%1.1f%%', shadow=True, startangle=90)
-
-        self.axes.append(fig1.add_subplot(subs + 2, 1, subs + 1))  # FOR GPU
-        self.axes[subs].pie(sizes, explode=explode, labels=labels, colors=colors,
-                    autopct='%1.1f%%', shadow=True, startangle=90)
-        self.axes.append(fig1.add_subplot(subs + 2, 1, subs + 2))  # FOR FPS
-        self.axes[subs + 1].pie(sizes, explode=explode, labels=labels, colors=colors,
-                    autopct='%1.1f%%', shadow=True, startangle=90)
-
-        fig1.set_tight_layout(True)
-        self.compute_initial_figure()
-
-        FigureCanvas.__init__(self, fig1)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def compute_initial_figure(self):
-       pass
-
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
 
@@ -217,15 +178,8 @@ class MainForm(QtGui.QMainWindow):
             self.mActivity = False
 
     def showCalc(self):
-        self.clac_widget = QtGui.QWidget(self)
-        self.layout.removeWidget(self.dc)
-        self.sc = MyStaticMplCanvas(self.sl, self.clac_widget, width=100, height=100, dpi=100, subs=1)
-        self.layout.addWidget(self.sc)
-        self.clac_widget.setFocus()
-        self.setCentralWidget(self.clac_widget)
-        screen = QtGui.QDesktopWidget().screenGeometry()
-        self.clac_widget.setGeometry(screen)
-        self.clac_widget.show()
+        self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
+        self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
 
 class Streamline(object):
     """Receive data for phone and then
