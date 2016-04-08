@@ -42,6 +42,29 @@ class Xls(object):
                 self.cpusheet.write(row, col + 1, item[1])
                 row += 1
 
+            chart = self.workbook.add_chart({'type': 'pie'})
+
+            # Configure the series. Note the use of the list syntax to define ranges:
+            chart.add_series({
+                'name': 'Pie sales data',
+                'categories': ['Sheet1', 1, col, row, col],
+                'values': ['Sheet1', 1, col + 1, row, col + 1],
+            })
+
+            # Add a title.
+            title = 'CPU' + str(cpu)
+            chart.set_title({'name': title})
+
+            # Set an Excel chart style. Colors with white outline and shadow.
+            chart.set_style(10)
+
+            # Insert the chart into the worksheet (with an offset).
+            chart.set_size({'width': 250, 'height': 200})
+            if cpu > 4:
+                self.cpusheet.insert_chart('C2', chart, {'x_offset': 270 * (cpu -5), 'y_offset': 300})
+            else:
+                self.cpusheet.insert_chart('C2', chart, {'x_offset': 270 * cpu, 'y_offset': 100})
+
     def writeGpuinfo(self, gpuinfo):
         row = 1
         curr_sorted = sorted(gpuinfo.items(), key=lambda d: d[0])
@@ -50,44 +73,6 @@ class Xls(object):
             self.gpusheet.write(row, 1, item[1])
             row += 1
 
-    def add_chart(self):
-        # Create a new chart object.
-        chart = self.workbook.add_chart({'type': 'line'})
-
-        chart.set_x_axis({
-            'name': 'Size',
-            'name_font': {'size': 14, 'bold': True},
-            'num_font': {'italic': True},
-        })
-
-        # Add a series to the chart.
-        avg_col = self.listsize + 1
-        arr_str = '=Sheet1!$L$2:$L$' + str(avg_col)
-        chart.add_series({
-            'name': 'Write',
-            'values': arr_str,
-            'marker': {
-                'type': 'square',
-                'size': 4,
-                'border': {'color': 'black'},
-                'fill': {'color': 'red'},
-            },
-        })
-
-        # Add a series to the chart.
-        arr_str = '=Sheet1!$M$2:$M$' + str(avg_col)
-        chart.add_series({
-            'name': 'Read',
-            'values': arr_str,
-            'marker': {
-                'type': 'square',
-                'size': 4,
-                'border': {'color': 'blue'},
-                'fill': {'color': 'red'},
-            },
-        })
-
-        self.worksheet.insert_chart('L20', chart)
 
     def finish(self):
         self.workbook.close()
