@@ -180,17 +180,22 @@ class MainForm(QtGui.QMainWindow):
             self.mActivity = False
 
     def showCalc(self):
-        self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
-        self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
-        self.sl.mBuf.mDisplayData.calc_fps_list()
 
-        self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
-        self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
-        self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
+        if self.mActivity ==True:
+            QtGui.QMessageBox.question(self, 'Message', "Please STOP First!")
+        elif self.sl.mBuf.is_threads_finish == False:
+            QtGui.QMessageBox.question(self, 'Message', "Waiting Process Buff...")
+        else:
+            self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
+            self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
+            self.sl.mBuf.mDisplayData.calc_fps_list()
 
-        self.sl.mXls.finish()
-        QtGui.QMessageBox.question(self, 'Message', "Calc Info Write Done")
+            self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
+            self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
+            self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
 
+            self.sl.mXls.finish()
+            QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")
 
 class Streamline(object):
     """Receive data for phone and then

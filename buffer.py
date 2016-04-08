@@ -5,6 +5,7 @@ import time
 
 import collections
 import itertools
+import sys
 
 
 class CpuFreqData(object):
@@ -297,6 +298,9 @@ class Buffer(object):
                 time.sleep(0.01)
                 self.rstatus = 0
 
+        self.mRstatus = True
+        sys.exit(0)
+
     def th_transfer(self):
         while self.mActivity or self.mFifo.qsize() > 0:
             if self.mFifo.empty():
@@ -316,6 +320,9 @@ class Buffer(object):
                         self.pstatus = 1
                 self.buff_mutex.release()
 
+        self.mTstatus = True
+        sys.exit(0)
+
     def th_process(self):
         while self.mActivity or self.mBuff.len() > 0:
             # Parse and collection
@@ -333,6 +340,9 @@ class Buffer(object):
                 if self.exit_count > 30:  # 3 sec
                     break
                 time.sleep(0.1)
+
+        self.mPstatus = True
+        sys.exit(0)
 
     def process_head(self):
         """Receive data to buff."""
@@ -423,10 +433,16 @@ class Buffer(object):
 
         self.mRecv_Thread.setDaemon(True)
         self.mRecv_Thread.start()
+        self.mRstatus = False
         self.mtran_Thread.setDaemon(True)
         self.mtran_Thread.start()
+        self.mTstatus = False
         self.mProc_Thread.setDaemon(True)
         self.mProc_Thread.start()
+        self.mPstatus = False
 
     def stop(self):
         self.mActivity = False
+
+    def is_threads_finish(self):
+        return self.mRstatus and self.mTstatus and self.mPstatus
