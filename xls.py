@@ -17,7 +17,7 @@ class Xls(object):
 
         cheadings = []
         for cpu in range(cpunum):
-            cheadings.extend(['CPU'+ str(cpu), 'Times'])
+            cheadings.extend(['CPU' + str(cpu), 'Times'])
 
         self.cpusheet.write_row('A1', cheadings, bold)
 
@@ -28,7 +28,7 @@ class Xls(object):
         for cpu in range(self.cpunum):
             row = 1
             col = cpu * 2
-            curr_sorted = sorted(cpuinfo[cpu].items(), key=lambda d:d[0])
+            curr_sorted = sorted(cpuinfo[cpu].items(), key=lambda d: d[0])
             for item in curr_sorted:
                 self.cpusheet.write(row, col, item[0])
                 self.cpusheet.write(row, col + 1, item[1])
@@ -53,7 +53,7 @@ class Xls(object):
             # Insert the chart into the worksheet (with an offset).
             chart.set_size({'width': 250, 'height': 200})
             if cpu > 4:
-                self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * (cpu -5), 'y_offset': 250})
+                self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * (cpu - 5), 'y_offset': 250})
             else:
                 self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * cpu, 'y_offset': 10})
 
@@ -83,7 +83,6 @@ class Xls(object):
         # Insert the chart into the worksheet (with an offset).
         chart.set_size({'width': 300, 'height': 250})
         self.showsheet.insert_chart('C2', chart, {'x_offset': 100, 'y_offset': 500})
-
 
     def finish(self):
         self.workbook.close()

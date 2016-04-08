@@ -14,6 +14,7 @@ from matplotlib.figure import Figure
 import numpy as np
 import xls
 
+
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
@@ -54,6 +55,7 @@ class MyMplCanvas(FigureCanvas):
 
     def compute_initial_figure(self):
         pass
+
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
@@ -186,6 +188,7 @@ class MainForm(QtGui.QMainWindow):
         self.sl.mXls.finish()
         QtGui.QMessageBox.question(self, 'Message', "Calc Info Write Done")
 
+
 class Streamline(object):
     """Receive data for phone and then
     Main line control at streamline.
@@ -261,6 +264,7 @@ class Streamline(object):
         self.countersXML.recv_body()
         self.countersXML.writeXML()
         """
+
     def start(self):
         # 1. Prepare
         self.prepare()
