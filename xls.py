@@ -9,6 +9,7 @@ class Xls(object):
         """
         self.cpunum = cpunum
         self.workbook = xlsxwriter.Workbook(excle_name)
+        self.showsheet = self.workbook.add_worksheet()
         self.cpusheet = self.workbook.add_worksheet()
         self.gpusheet = self.workbook.add_worksheet()
 
@@ -22,15 +23,6 @@ class Xls(object):
 
         gheadings = ['GPUFreq', 'Times']
         self.gpusheet.write_row('A1', gheadings, bold)
-
-    def write_excle(self, fields):
-        """
-        Write out to excel table.
-        """
-        row = long(fields['col'])
-
-        self.worksheet.write(row, 4, float(fields['time']))
-        self.worksheet.write(row, 5, float(fields['perf']))
 
     def writeCpuinfo(self, cpuinfo):
         for cpu in range(self.cpunum):
@@ -46,9 +38,9 @@ class Xls(object):
 
             # Configure the series. Note the use of the list syntax to define ranges:
             chart.add_series({
-                'name': 'Pie sales data',
-                'categories': ['Sheet1', 1, col, row, col],
-                'values': ['Sheet1', 1, col + 1, row, col + 1],
+                'name': 'CPU Frequency',
+                'categories': ['Sheet2', 1, col, row, col],
+                'values': ['Sheet2', 1, col + 1, row, col + 1],
             })
 
             # Add a title.
@@ -61,9 +53,9 @@ class Xls(object):
             # Insert the chart into the worksheet (with an offset).
             chart.set_size({'width': 250, 'height': 200})
             if cpu > 4:
-                self.cpusheet.insert_chart('C2', chart, {'x_offset': 270 * (cpu -5), 'y_offset': 300})
+                self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * (cpu -5), 'y_offset': 250})
             else:
-                self.cpusheet.insert_chart('C2', chart, {'x_offset': 270 * cpu, 'y_offset': 100})
+                self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * cpu, 'y_offset': 10})
 
     def writeGpuinfo(self, gpuinfo):
         row = 1
@@ -72,6 +64,25 @@ class Xls(object):
             self.gpusheet.write(row, 0, item[0])
             self.gpusheet.write(row, 1, item[1])
             row += 1
+
+        chart = self.workbook.add_chart({'type': 'pie'})
+
+        # Configure the series. Note the use of the list syntax to define ranges:
+        chart.add_series({
+            'name': 'GPU Frequency',
+            'categories': ['Sheet3', 1, 0, row, 0],
+            'values': ['Sheet3', 1, 1, row, 1],
+        })
+
+        # Add a title.
+        chart.set_title({'name': 'GPU Frequency'})
+
+        # Set an Excel chart style. Colors with white outline and shadow.
+        chart.set_style(10)
+
+        # Insert the chart into the worksheet (with an offset).
+        chart.set_size({'width': 300, 'height': 250})
+        self.showsheet.insert_chart('C2', chart, {'x_offset': 100, 'y_offset': 500})
 
 
     def finish(self):

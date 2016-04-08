@@ -184,7 +184,7 @@ class MainForm(QtGui.QMainWindow):
         self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
         self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
         self.sl.mXls.finish()
-        QtGui.QMessageBox.question(self, 'Message', "Calc info have write to XLS")
+        QtGui.QMessageBox.question(self, 'Message', "Calc Info Write Done")
 
 class Streamline(object):
     """Receive data for phone and then
