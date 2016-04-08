@@ -193,9 +193,19 @@ class MainForm(QtGui.QMainWindow):
             self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
             self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
             self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
-
+            self.sl.mXls.write_suggestion_info()
             self.sl.mXls.finish()
             QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")
+
+            suggestion = self.sl.mXls.calc_reggestion_cpu()
+
+            suggmsg = 'Min CPU:\nll_freq: %d  ll_num: %d\n' \
+                      'l_freq: %d l_num: %d\nb_freq: %d b_num: %d \n\nMin GPU Freq:   %d ' \
+                      % (suggestion[0], suggestion[1],
+                         suggestion[2], suggestion[3],
+                         suggestion[4], suggestion[5], suggestion[6])
+
+            QtGui.QMessageBox.question(self, 'Message', suggmsg)
 
 
 class Streamline(object):

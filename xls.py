@@ -1,8 +1,22 @@
+from __future__ import division
 import xlsxwriter
 
 
 class Xls(object):
     cpunum = 0
+
+    cpuinfo = None
+    gpuinfo = None
+    fpsinfo = None
+
+    sugg_cpufreq = []
+    sugg_cpufreq_ll = 0
+    sugg_cpufreq_l = 0
+    sugg_cpufreq_b = 0
+    sugg_cpunum_ll = 0
+    sugg_cpunum_l = 0
+    sugg_cpunum_b = 0
+    sugg_gpufreq = 0
 
     def __init__(self, excle_name, cpunum):
         """
@@ -29,6 +43,9 @@ class Xls(object):
         self.fpssheet.write_row('A1', fheadings, bold)
 
     def writeCpuinfo(self, cpuinfo):
+
+        self.cpuinfo = cpuinfo
+
         for cpu in range(self.cpunum):
             row = 1
             col = cpu * 2
@@ -62,6 +79,9 @@ class Xls(object):
                 self.showsheet.insert_chart('C2', chart, {'x_offset': 270 * cpu, 'y_offset': 10})
 
     def writeGpuinfo(self, gpuinfo):
+
+        self.gpuinfo = gpuinfo
+
         row = 1
         curr_sorted = sorted(gpuinfo.items(), key=lambda d: d[0])
         for item in curr_sorted:
@@ -89,6 +109,9 @@ class Xls(object):
         self.showsheet.insert_chart('C2', chart, {'x_offset': 100, 'y_offset': 500})
 
     def writeFpsinfo(self, fpsinfo):
+
+        self.fpsinfo = fpsinfo
+
         row = 1
         curr_sorted = sorted(fpsinfo.items(), key=lambda d: d[0])
         for item in curr_sorted:
@@ -117,3 +140,65 @@ class Xls(object):
 
     def finish(self):
         self.workbook.close()
+
+    def calc_reggestion_cpu(self):
+
+        self.sugg_cpufreq_ll = 0
+        for cpu in range(4):
+            if self.sugg_cpufreq_ll < self.sugg_cpufreq[cpu]:
+                self.sugg_cpufreq_ll = self.sugg_cpufreq[cpu]
+
+            if self.sugg_cpufreq[cpu] > 0:
+                self.sugg_cpunum_ll += 1
+
+        self.sugg_cpufreq_l = 0
+        for cpu in range(4, 8):
+            if self.sugg_cpufreq_l < self.sugg_cpufreq[cpu]:
+                self.sugg_cpufreq_l = self.sugg_cpufreq[cpu]
+
+            if self.sugg_cpufreq[cpu] > 0:
+                self.sugg_cpunum_l += 1
+
+        self.sugg_cpufreq_b = 0
+        for cpu in range(8, 10):
+            if self.sugg_cpufreq_b < self.sugg_cpufreq[cpu]:
+                self.sugg_cpufreq_b = self.sugg_cpufreq[cpu]
+
+            if self.sugg_cpufreq[cpu] > 0:
+                self.sugg_cpunum_b += 1
+
+        return [self.sugg_cpufreq_ll, self.sugg_cpunum_ll,
+                self.sugg_cpufreq_l, self.sugg_cpunum_l,
+                self.sugg_cpufreq_b, self.sugg_cpunum_b,
+                self.sugg_gpufreq]
+
+    def write_suggestion_info(self):
+
+        total_time = 0
+        curr_sorted = sorted(self.cpuinfo[0].items(), key=lambda d: d[0])
+        for item in curr_sorted:
+            ts = item[1]
+            total_time += ts
+
+        for cpu in range(self.cpunum):
+            percent = 0
+            curr_sorted = sorted(self.cpuinfo[cpu].items(), key=lambda d: d[0])
+            for item in curr_sorted:
+                ts = item[1]
+                percent += ts / total_time
+
+                if percent > 0.5:
+                    self.sugg_cpufreq.append(item[0])
+                    self.showsheet.write(0, cpu, item[0])
+                    break
+
+        percent = 0
+        curr_sorted = sorted(self.gpuinfo.items(), key=lambda d: d[0])
+        for item in curr_sorted:
+            ts = item[1]
+            percent += ts / total_time
+
+            if percent > 0.5:
+                self.sugg_gpufreq = item[0]
+                self.showsheet.write(0, cpu + 1, item[0])
+                break
