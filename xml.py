@@ -4,7 +4,7 @@ import struct
 
 
 class Xml(object):
-    xname = None
+    xName = None
     cmmd_buff = None
     head = None
     resp = None
@@ -105,7 +105,7 @@ class EventsXML(Xml):
                                     116, 121, 112, 101, 61, 34, 101, 118, 101, 110, 116, 115, 34, 47, 62, 10])
 
     # counter set add
-    def eventsXML(buff):
+    def eventsXML(self, buff):
         tree = etree.parse(buff)
         root = tree.getroot()
 
@@ -142,7 +142,7 @@ class CountersXML(Xml):
                                     116, 121, 112, 101, 61, 34, 99, 111, 117, 110, 116, 101, 114, 115, 34, 47,
                                     62, 10])
 
-    def countersXML(buff):
+    def countersXML(self, buff):
         tree = etree.parse(buff)
         root = tree.getroot()
 
@@ -153,6 +153,10 @@ class CountersXML(Xml):
 
 
 class CapturedXML(Xml):
+    cpufreq_key = -1
+    gpufreq_key = -1
+    fps_key = -1
+
     def __init__(self, con, name='captured.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 66, 0, 0, 0,  # HEAD
@@ -162,8 +166,8 @@ class CapturedXML(Xml):
                                     116, 121, 112, 101, 61, 34, 99, 97, 112, 116, 117, 114, 101, 100, 34, 47,
                                     62, 10])
 
-    def capturedXML(buff):
-        tree = etree.parse(buff)
+    def capturedXML(self):
+        tree = etree.parse(self.xName)
         root = tree.getroot()
 
         version = root.get("version")
@@ -188,3 +192,12 @@ class CapturedXML(Xml):
                     if evnet == None:
                         evnet = ""
                         # print 'Key:' + key + '  Type:' + type + '   Event:' + evnet
+
+                    if type == 'Linux_power_cpu_freq':
+                        self.cpufreq_key = int(key, 16)
+
+                    if type == 'Linux_power_gpu_freq':
+                        self.gpufreq_key = int(key, 16)
+
+                    if type == 'Linux_power_fps':
+                        self.fps_key = int(key, 16)

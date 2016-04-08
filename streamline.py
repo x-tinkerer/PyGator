@@ -181,7 +181,7 @@ class MainForm(QtGui.QMainWindow):
 
     def showCalc(self):
 
-        if self.mActivity ==True:
+        if self.mActivity == True:
             QtGui.QMessageBox.question(self, 'Message', "Please STOP First!")
         elif self.sl.mBuf.is_threads_finish == False:
             QtGui.QMessageBox.question(self, 'Message', "Waiting Process Buff...")
@@ -197,6 +197,7 @@ class MainForm(QtGui.QMainWindow):
             self.sl.mXls.finish()
             QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")
 
+
 class Streamline(object):
     """Receive data for phone and then
     Main line control at streamline.
@@ -210,7 +211,6 @@ class Streamline(object):
     sessionXML = None
     mCon = None  # connector
     mBuf = None  # Receive buffer
-    mXml = None
     mAPC = None
     mXls = None
 
@@ -223,7 +223,7 @@ class Streamline(object):
         self.capturedXML = xml.CapturedXML(self.mCon)
         self.sessionXML = xml.SessionXML(self.mCon)
         self.mAPC = apc.Apc(self.mCon, '0000000000')
-        self.mBuf = buffer.Buffer(self.mCon, self.mAPC)
+        self.mBuf = buffer.Buffer(self.mCon, self.mAPC, self.capturedXML)
         self.mXls = xls.Xls('Calc.xlsx', 10)
         self.status = -1
 
@@ -259,6 +259,8 @@ class Streamline(object):
         self.capturedXML.recv_head()
         self.capturedXML.recv_body()
         self.capturedXML.writeXML()
+        self.capturedXML.capturedXML()
+        self.mBuf.mDisplayData.set_keys(self.capturedXML)
         """
         self.eventsXML.send_comm()
         time.sleep(1)

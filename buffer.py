@@ -9,7 +9,7 @@ import sys
 
 
 class CpuFreqData(object):
-    def __init__(self, num):
+    def __init__(self, num, key):
         self.cpufreq_lock = threading.Lock()
         # [freq[0],ts[0],freq[1],ts[1], ... ,freq[9],ts[9]]
         self.cpufreq = [[] for i in range(num * 2)]
@@ -18,6 +18,7 @@ class CpuFreqData(object):
         self.lastcpufreq = [-1 for i in range(num)]
 
         # For calc
+        self.cpufreq_key = key
         self.cpuinfo = [{} for x in range(num)]
 
 
@@ -29,7 +30,7 @@ class CpuUsageData(object):
 
 
 class GpuFreqData(object):
-    def __init__(self):
+    def __init__(self, key):
         # freq[0], ts[0]
         self.gpufreq_lock = threading.Lock()
         self.gpufreq = [[], []]
@@ -38,27 +39,34 @@ class GpuFreqData(object):
         self.lastgpufreq = -1
 
         # For calc
+        self.gpufreq_key = key
         self.gpuinfo = {}
 
 
 class FpsData(object):
-    def __init__(self):
+    def __init__(self, key):
         # fps[0], ts[0]
         self.fps_lock = threading.Lock()
         self.fps = [[], []]
 
         # For calc
+        self.fps_key = key
         self.fpsinfo = {}
 
 
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
-    def __init__(self, num):
+    def __init__(self, num, xml):
         self.cpunum = num
         self.lastts = -1
-        CpuFreqData.__init__(self, num)
+        CpuFreqData.__init__(self, num, xml.cpufreq_key)
         CpuUsageData.__init__(self, num)
-        GpuFreqData.__init__(self)
-        FpsData.__init__(self)
+        GpuFreqData.__init__(self, xml.gpufreq_key)
+        FpsData.__init__(self, xml.fps_key)
+
+    def set_keys(self,xml):
+        self.cpufreq_key = xml.cpufreq_key
+        self.gpufreq_key = xml.gpufreq_key
+        self.fps_key = xml.fps_key
 
     def calc_cpu_freq_list(self):
         """
@@ -262,19 +270,19 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, apc, buff_size=1024 * 1024 * 20, sock_size=200 * 1024, fifo_size=1024 * 1024):
+    def __init__(self, con, apc, xml, buff_size=1024 * 1024 * 20, sock_size=200 * 1024, fifo_size=1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
         self.mAPC = apc
         self.sSize = sock_size
         self.bSize = buff_size
         self.mBuff = RingBuffer(buff_size)
-        self.mPar = parser.Parser(self.cur_buff)
         self.mFifo = Queue.Queue(fifo_size)
         self.fifo_mutex = threading.Lock()
         self.buff_mutex = threading.Lock()
 
-        self.mDisplayData = DisplayData(10)
+        self.mDisplayData = DisplayData(10, xml)
+        self.mPar = parser.Parser(self.mDisplayData)
 
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
         self.mtran_Thread = threading.Thread(target=self.th_transfer, args=(), name='gt-tran')

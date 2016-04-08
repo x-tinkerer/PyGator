@@ -2,7 +2,7 @@ class Parser(object):
     mBuf = None
 
     def __init__(self, buff):
-        self.mBuf = buff
+        self.mDisplayData = buff
 
     def readString(self, inbytes, size):
         result = ''.join(chr(cur) for cur in inbytes[:size])
@@ -145,8 +145,8 @@ class Parser(object):
             # mInfo += '  Value: ' + str(Value)
             # print mInfo
 
-            # TODO: Need get key from captured xml.
-            if Key == 0x2D:  # cpufreq
+            #if Key == self.mDisplayData.cpufreq_key:  # cpufreq
+            if Key == outbuf.cpufreq_key:
                 outbuf.cpufreq_lock.acquire()
 
                 ins_index = len(outbuf.cpufreq[Core * 2 + 1]) - 1
@@ -162,7 +162,7 @@ class Parser(object):
 
                 outbuf.cpufreq_lock.release()
 
-            if Key == 0x2F:  # gpufreq
+            elif Key == outbuf.gpufreq_key:  # gpufreq
                 outbuf.gpufreq_lock.acquire()
 
                 ins_index = len(outbuf.gpufreq[1]) - 1
@@ -177,7 +177,7 @@ class Parser(object):
 
                 outbuf.gpufreq_lock.release()
 
-            if Key == 0x31:  # fps
+            elif Key == outbuf.fps_key:  # fps
                 outbuf.fps_lock.acquire()
                 ins_index = len(outbuf.fps[1]) - 1
                 if ins_index < 0:
