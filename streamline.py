@@ -37,10 +37,10 @@ class MyMplCanvas(FigureCanvas):
 
         self.axes[subs].set_title('GPU')
         self.axes[subs].set_xlim(0, 20000)
-        self.axes[subs].set_ylim(0, 2500)
+        self.axes[subs].set_ylim(0, 850)
         self.axes[subs + 1].set_title('FPS')
         self.axes[subs + 1].set_xlim(0, 20000)
-        self.axes[subs + 1].set_ylim(0, 2500)
+        self.axes[subs + 1].set_ylim(0, 100)
 
         fig.set_tight_layout(True)
         self.compute_initial_figure()
@@ -105,7 +105,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
             self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
             self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
-            self.axes[self.plotnum + 1].set_ylim(0, 60)
+            self.axes[self.plotnum + 1].set_ylim(0, 100)
 
             self.draw()
 
@@ -182,9 +182,12 @@ class MainForm(QtGui.QMainWindow):
     def showCalc(self):
         self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
         self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
+        self.sl.mBuf.mDisplayData.calc_fps_list()
 
         self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
         self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
+        self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
+
         self.sl.mXls.finish()
         QtGui.QMessageBox.question(self, 'Message', "Calc Info Write Done")
 

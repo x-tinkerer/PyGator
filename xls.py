@@ -12,6 +12,7 @@ class Xls(object):
         self.showsheet = self.workbook.add_worksheet()
         self.cpusheet = self.workbook.add_worksheet()
         self.gpusheet = self.workbook.add_worksheet()
+        self.fpssheet = self.workbook.add_worksheet()
 
         bold = self.workbook.add_format({'bold': True})
 
@@ -23,6 +24,9 @@ class Xls(object):
 
         gheadings = ['GPUFreq', 'Times']
         self.gpusheet.write_row('A1', gheadings, bold)
+
+        fheadings = ['FPS', 'Counts']
+        self.fpssheet.write_row('A1', fheadings, bold)
 
     def writeCpuinfo(self, cpuinfo):
         for cpu in range(self.cpunum):
@@ -83,6 +87,33 @@ class Xls(object):
         # Insert the chart into the worksheet (with an offset).
         chart.set_size({'width': 300, 'height': 250})
         self.showsheet.insert_chart('C2', chart, {'x_offset': 100, 'y_offset': 500})
+
+    def writeFpsinfo(self, fpsinfo):
+        row = 1
+        curr_sorted = sorted(fpsinfo.items(), key=lambda d: d[0])
+        for item in curr_sorted:
+            self.fpssheet.write(row, 0, item[0])
+            self.fpssheet.write(row, 1, item[1])
+            row += 1
+
+        chart = self.workbook.add_chart({'type': 'pie'})
+
+        # Configure the series. Note the use of the list syntax to define ranges:
+        chart.add_series({
+            'name': 'FPS Info',
+            'categories': ['Sheet4', 1, 0, row, 0],
+            'values': ['Sheet4', 1, 1, row, 1],
+        })
+
+        # Add a title.
+        chart.set_title({'name': 'FPS Info'})
+
+        # Set an Excel chart style. Colors with white outline and shadow.
+        chart.set_style(10)
+
+        # Insert the chart into the worksheet (with an offset).
+        chart.set_size({'width': 300, 'height': 250})
+        self.showsheet.insert_chart('C2', chart, {'x_offset': 500, 'y_offset': 500})
 
     def finish(self):
         self.workbook.close()

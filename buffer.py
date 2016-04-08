@@ -46,6 +46,9 @@ class FpsData(object):
         self.fps_lock = threading.Lock()
         self.fps = [[], []]
 
+        # For calc
+        self.fpsinfo = {}
+
 
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
     def __init__(self, num):
@@ -98,6 +101,44 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
 
             lastkey = value
             lastts = ts
+
+    def calc_fps_list(self):
+
+        level_10 = 0  # 0 -10 fps
+        level_20 = 0  # 0 -10 fps
+        level_25 = 0  # 0 -10 fps
+        level_30 = 0  # 0 -10 fps
+        level_40 = 0  # 0 -10 fps
+        level_45 = 0  # 0 -10 fps
+        level_50 = 0  # 0 -10 fps
+        level_60 = 0  # 0 -10 fps
+
+        for index, value in enumerate(self.fps[0]):
+            if value < 10:
+                level_10 += 1
+            elif value < 20:
+                level_20 += 1
+            elif value < 25:
+                level_25 += 1
+            elif value < 30:
+                level_30 += 1
+            elif value < 40:
+                level_40 += 1
+            elif value < 45:
+                level_45 += 1
+            elif value < 50:
+                level_50 += 1
+            else:
+                level_60 += 1
+
+        self.fpsinfo[10] = level_10
+        self.fpsinfo[20] = level_20
+        self.fpsinfo[25] = level_25
+        self.fpsinfo[30] = level_30
+        self.fpsinfo[40] = level_40
+        self.fpsinfo[45] = level_45
+        self.fpsinfo[50] = level_50
+        self.fpsinfo[60] = level_60
 
     def cut_window_array(self):
         """
