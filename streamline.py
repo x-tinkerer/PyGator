@@ -12,7 +12,7 @@ from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-
+import xls
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -181,6 +181,11 @@ class MainForm(QtGui.QMainWindow):
         self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
         self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
 
+        self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
+        self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
+        self.sl.mXls.finish()
+        QtGui.QMessageBox.question(self, 'Message', "Calc info have write to XLS")
+
 class Streamline(object):
     """Receive data for phone and then
     Main line control at streamline.
@@ -196,6 +201,7 @@ class Streamline(object):
     mBuf = None  # Receive buffer
     mXml = None
     mAPC = None
+    mXls = None
 
     status = -1
 
@@ -207,6 +213,7 @@ class Streamline(object):
         self.sessionXML = xml.SessionXML(self.mCon)
         self.mAPC = apc.Apc(self.mCon, '0000000000')
         self.mBuf = buffer.Buffer(self.mCon, self.mAPC)
+        self.mXls = xls.Xls('Calc.xlsx', 10)
         self.status = -1
 
     def prepare_xml(self):
