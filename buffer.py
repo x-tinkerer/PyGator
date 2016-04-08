@@ -63,7 +63,7 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
         GpuFreqData.__init__(self, xml.gpufreq_key)
         FpsData.__init__(self, xml.fps_key)
 
-    def set_keys(self,xml):
+    def set_keys(self, xml):
         self.cpufreq_key = xml.cpufreq_key
         self.gpufreq_key = xml.gpufreq_key
         self.fps_key = xml.fps_key
@@ -408,7 +408,7 @@ class Buffer(object):
             self.mPar.handleName()
         elif frame_type == 4:
             print 'Parse Counter...'
-            self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1, self.mDisplayData)
+            self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1)
         elif frame_type == 5:
             print 'Parse Block...'
             self.mPar.handleBlock()

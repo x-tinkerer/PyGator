@@ -117,7 +117,7 @@ class Parser(object):
     def handleName(self):
         pass
 
-    def handleCounter(self, inbuf, size, outbuf):
+    def handleCounter(self, inbuf, size):
         """
             Timestamp:
             Core:	packed32	Core to which this counter applies
@@ -145,52 +145,52 @@ class Parser(object):
             # mInfo += '  Value: ' + str(Value)
             # print mInfo
 
-            #if Key == self.mDisplayData.cpufreq_key:  # cpufreq
-            if Key == outbuf.cpufreq_key:
-                outbuf.cpufreq_lock.acquire()
+            # if Key == self.mDisplayData.cpufreq_key:  # cpufreq
+            if Key == self.mDisplayData.cpufreq_key:
+                self.mDisplayData.cpufreq_lock.acquire()
 
-                ins_index = len(outbuf.cpufreq[Core * 2 + 1]) - 1
+                ins_index = len(self.mDisplayData.cpufreq[Core * 2 + 1]) - 1
                 if ins_index < 0:
-                    outbuf.cpufreq[Core * 2].append(Value / 1000000)
-                    outbuf.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
+                    self.mDisplayData.cpufreq[Core * 2].append(Value / 1000000)
+                    self.mDisplayData.cpufreq[Core * 2 + 1].append(Timestamp / 1000000)
                 else:
-                    while ins_index >= 0 and outbuf.cpufreq[Core * 2 + 1][ins_index] > Timestamp / 1000000:
+                    while ins_index >= 0 and self.mDisplayData.cpufreq[Core * 2 + 1][ins_index] > Timestamp / 1000000:
                         ins_index -= 1
 
-                    outbuf.cpufreq[Core * 2].insert(ins_index + 1, Value / 1000000)
-                    outbuf.cpufreq[Core * 2 + 1].insert(ins_index + 1, Timestamp / 1000000)
+                    self.mDisplayData.cpufreq[Core * 2].insert(ins_index + 1, Value / 1000000)
+                    self.mDisplayData.cpufreq[Core * 2 + 1].insert(ins_index + 1, Timestamp / 1000000)
 
-                outbuf.cpufreq_lock.release()
+                self.mDisplayData.cpufreq_lock.release()
 
-            elif Key == outbuf.gpufreq_key:  # gpufreq
-                outbuf.gpufreq_lock.acquire()
+            elif Key == self.mDisplayData.gpufreq_key:  # gpufreq
+                self.mDisplayData.gpufreq_lock.acquire()
 
-                ins_index = len(outbuf.gpufreq[1]) - 1
+                ins_index = len(self.mDisplayData.gpufreq[1]) - 1
                 if ins_index < 0:
-                    outbuf.gpufreq[0].append(Value / 1000000)
-                    outbuf.gpufreq[1].append(Timestamp / 1000000)
+                    self.mDisplayData.gpufreq[0].append(Value / 1000000)
+                    self.mDisplayData.gpufreq[1].append(Timestamp / 1000000)
                 else:
-                    while ins_index >= 0 and outbuf.gpufreq[1][ins_index] > Timestamp / 1000000:
+                    while ins_index >= 0 and self.mDisplayData.gpufreq[1][ins_index] > Timestamp / 1000000:
                         ins_index -= 1
-                    outbuf.gpufreq[0].insert(ins_index + 1, Value / 1000000)
-                    outbuf.gpufreq[1].insert(ins_index + 1, Timestamp / 1000000)
+                    self.mDisplayData.gpufreq[0].insert(ins_index + 1, Value / 1000000)
+                    self.mDisplayData.gpufreq[1].insert(ins_index + 1, Timestamp / 1000000)
 
-                outbuf.gpufreq_lock.release()
+                self.mDisplayData.gpufreq_lock.release()
 
-            elif Key == outbuf.fps_key:  # fps
-                outbuf.fps_lock.acquire()
-                ins_index = len(outbuf.fps[1]) - 1
+            elif Key == self.mDisplayData.fps_key:  # fps
+                self.mDisplayData.fps_lock.acquire()
+                ins_index = len(self.mDisplayData.fps[1]) - 1
                 if ins_index < 0:
-                    outbuf.fps[0].append(Value)
-                    outbuf.fps[1].append(Timestamp / 1000000)
+                    self.mDisplayData.fps[0].append(Value)
+                    self.mDisplayData.fps[1].append(Timestamp / 1000000)
                 else:
-                    while ins_index >= 0 and outbuf.fps[1][ins_index] > Timestamp / 1000000:
+                    while ins_index >= 0 and self.mDisplayData.fps[1][ins_index] > Timestamp / 1000000:
                         ins_index -= 1
-                    outbuf.fps[0].insert(ins_index + 1, Value)
-                    outbuf.fps[1].insert(ins_index + 1, Timestamp / 1000000)
-                outbuf.fps_lock.release()
+                    self.mDisplayData.fps[0].insert(ins_index + 1, Value)
+                    self.mDisplayData.fps[1].insert(ins_index + 1, Timestamp / 1000000)
+                self.mDisplayData.fps_lock.release()
 
-            outbuf.lastts = Timestamp / 1000000
+            self.mDisplayData.lastts = Timestamp / 1000000
 
     def handleBlock(self):
         pass
