@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python ./streamline.pyc
+python ./main.py

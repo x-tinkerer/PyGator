@@ -319,3 +319,11 @@ if __name__ == "__main__":
     form = MainForm(sl)
     form.show()
     sys.exit(app.exec_())
+
+
+def streamline_main():
+    sl = Streamline()
+    app = QtGui.QApplication(sys.argv)
+    form = MainForm(sl)
+    form.show()
+    sys.exit(app.exec_())
