@@ -3,3 +3,5 @@
 0000000000
 *.xml
 Calc.xlsx
+build/
+dist/
