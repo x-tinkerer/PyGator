@@ -3,8 +3,21 @@ An useful tool for CPU/GPU params tunning.
 
 ## Setup:
 1. install python 2.7
+
+
 2. install pip
-3. pip install PyQt4 matplotlib numpy lxml xlsxwriter
+`sudo apt-get install python-pip python-dev build-essential`
+
+
+3. install 
+`sudo apt-get install libpng-dev`
+`tar -xvf freetype-2.6.3.tar.bz2`
+`cd freetype-2.6.3`
+`sudo make install`
+
+
+4. install xlsxwriter
+    `pip install  xlsxwriter`
 
 ## Run:
 
