@@ -398,40 +398,41 @@ class Buffer(object):
         """
         frame_type = self.cur_buff[0]
         if frame_type == 1:
-            print 'Parse Summary...'
+            # print 'Parse Summary...'
             self.mPar.handleSummary(self.cur_buff[1:])
         elif frame_type == 2:
-            print 'Parse Backtrace...'
+            # print 'Parse Backtrace...'
             self.mPar.handleBacktrace()
         elif frame_type == 3:
-            print 'Parse Name...'
+            # print 'Parse Name...'
             self.mPar.handleName()
         elif frame_type == 4:
-            print 'Parse Counter...'
+            # print 'Parse Counter...'
             self.mPar.handleCounter(self.cur_buff[1:], self.cur_buff_size - 1)
         elif frame_type == 5:
-            print 'Parse Block...'
+            # print 'Parse Block...'
             self.mPar.handleBlock()
         elif frame_type == 6:
-            print 'Parse Annotate...'
+            # print 'Parse Annotate...'
             self.mPar.handleAnnotate()
         elif frame_type == 7:
-            print 'Parse Scheduler...'
+            # print 'Parse Scheduler...'
             self.mPar.handleScheduler()
         elif frame_type == 9:
-            print 'Parse Idle...'
+            # print 'Parse Idle...'
             self.mPar.handleIdle()
         elif frame_type == 10:
-            print 'Parse External...'
+            # print 'Parse External...'
             self.mPar.handleExternal()
         elif frame_type == 11:
-            print 'Parse Proc...'
+            # print 'Parse Proc...'
             self.mPar.handleProc()
         elif frame_type == 12:
-            print 'Parse Activity...'
+            # print 'Parse Activity...'
             self.mPar.handleActivity()
         else:
-            print "Body type err."
+            # print "Body type err."
+            pass
 
         self.pstatus = 1
 
