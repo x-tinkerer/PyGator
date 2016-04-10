@@ -261,11 +261,11 @@ class Streamline(object):
         self.sessionXML.send_comm()
         # self.sessionXML.readXML()
         self.sessionXML.send_body()
-        time.sleep(1)
+        time.sleep(0.1)
         self.sessionXML.recv_response()
 
         self.capturedXML.send_comm()
-        time.sleep(1)
+        time.sleep(0.1)
         self.capturedXML.recv_head()
         self.capturedXML.recv_body()
         self.capturedXML.writeXML()
