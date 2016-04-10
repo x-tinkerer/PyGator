@@ -2,22 +2,26 @@
 An useful tool for CPU/GPU params tunning.
 
 ## Setup:
-1. install python 2.7
+1. Setup ADB.
+    Add line `export PATH:$PATH:"adb_path ..."` to .bashrc
+    `source .bashrc`
 
+2. Install python 2.7(ubuntu default have,skip)
 
-2. install pip
+3. Install pip
     `sudo apt-get install python-pip python-dev build-essential`
 
 
-3. install 
+4. Install matplotlib
     `sudo apt-get install libpng-dev`
+
+    In dependency:
     `tar -xvf freetype-2.6.3.tar.bz2`
     `cd freetype-2.6.3`
     `sudo make install`
     `sudo pip install  matplotlib`
- 
 
-4. install xlsxwriter
+5. Install xlsxwriter
     `sudo pip install  xlsxwriter`
 
 ## Run:
