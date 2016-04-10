@@ -6,18 +6,19 @@ An useful tool for CPU/GPU params tunning.
 
 
 2. install pip
-`sudo apt-get install python-pip python-dev build-essential`
+    `sudo apt-get install python-pip python-dev build-essential`
 
 
 3. install 
-`sudo apt-get install libpng-dev`
-`tar -xvf freetype-2.6.3.tar.bz2`
-`cd freetype-2.6.3`
-`sudo make install`
-
+    `sudo apt-get install libpng-dev`
+    `tar -xvf freetype-2.6.3.tar.bz2`
+    `cd freetype-2.6.3`
+    `sudo make install`
+    `sudo pip install  matplotlib`
+ 
 
 4. install xlsxwriter
-    `pip install  xlsxwriter`
+    `sudo pip install  xlsxwriter`
 
 ## Run:
 
