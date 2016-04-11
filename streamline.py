@@ -224,9 +224,14 @@ class Streamline(object):
     mAPC = None
     mXls = None
 
+    mPlatform = None
+    appNane = None
+
     status = -1
 
-    def __init__(self):
+    def __init__(self, platform, name):
+        self.mPlatform = platform
+        self.appNane = name
         self.mCon = connector.Connector('localhost', 8084)
         self.eventsXML = xml.EventsXML(self.mCon)
         self.countersXML = xml.CountersXML(self.mCon)
@@ -321,8 +326,8 @@ if __name__ == "__main__":
     sys.exit(app.exec_())
 
 
-def streamline_main():
-    sl = Streamline()
+def streamline_main(platform, name):
+    sl = Streamline(platform, name)
     app = QtGui.QApplication(sys.argv)
     form = MainForm(sl)
     form.show()
