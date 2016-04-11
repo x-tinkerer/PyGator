@@ -1,6 +1,6 @@
 from __future__ import division
 import xlsxwriter
-
+import os
 
 class Xls(object):
     cpunum = 0
@@ -18,11 +18,13 @@ class Xls(object):
     sugg_cpunum_b = 0
     sugg_gpufreq = 0
 
-    def __init__(self, excle_name, cpunum):
+    def __init__(self, dir, excle_name, device):
         """
         """
-        self.cpunum = cpunum
-        self.workbook = xlsxwriter.Workbook(excle_name)
+        self.dev = device
+        self.cpunum = self.dev.cpu_num
+        excle_path = os.path.join(dir, excle_name)
+        self.workbook = xlsxwriter.Workbook(excle_path)
         self.showsheet = self.workbook.add_worksheet()
         self.cpusheet = self.workbook.add_worksheet()
         self.gpusheet = self.workbook.add_worksheet()
@@ -31,7 +33,7 @@ class Xls(object):
         bold = self.workbook.add_format({'bold': True})
 
         cheadings = []
-        for cpu in range(cpunum):
+        for cpu in range(self.cpunum):
             cheadings.extend(['CPU' + str(cpu), 'Times'])
 
         self.cpusheet.write_row('A1', cheadings, bold)
@@ -143,34 +145,47 @@ class Xls(object):
 
     def calc_reggestion_cpu(self):
 
-        self.sugg_cpufreq_ll = 0
-        for cpu in range(4):
-            if self.sugg_cpufreq_ll < self.sugg_cpufreq[cpu]:
-                self.sugg_cpufreq_ll = self.sugg_cpufreq[cpu]
+        sugg = []
 
-            if self.sugg_cpufreq[cpu] > 0:
-                self.sugg_cpunum_ll += 1
+        if self.dev.cluster_0 > 0:
+            self.sugg_cpufreq_ll = 0
+            for cpu in range(self.dev.cluster_0):
+                if self.sugg_cpufreq_ll < self.sugg_cpufreq[cpu]:
+                    self.sugg_cpufreq_ll = self.sugg_cpufreq[cpu]
 
-        self.sugg_cpufreq_l = 0
-        for cpu in range(4, 8):
-            if self.sugg_cpufreq_l < self.sugg_cpufreq[cpu]:
-                self.sugg_cpufreq_l = self.sugg_cpufreq[cpu]
+                if self.sugg_cpufreq[cpu] > 0:
+                    self.sugg_cpunum_ll += 1
 
-            if self.sugg_cpufreq[cpu] > 0:
-                self.sugg_cpunum_l += 1
+            sugg.append(self.sugg_cpufreq_ll)
+            sugg.append(self.sugg_cpunum_ll)
 
-        self.sugg_cpufreq_b = 0
-        for cpu in range(8, 10):
-            if self.sugg_cpufreq_b < self.sugg_cpufreq[cpu]:
-                self.sugg_cpufreq_b = self.sugg_cpufreq[cpu]
+        if self.dev.cluster_1 > 0:
+            self.sugg_cpufreq_l = 0
+            for cpu in range(self.dev.cluster_0, self.dev.cluster_0 + self.dev.cluster_1):
+                if self.sugg_cpufreq_l < self.sugg_cpufreq[cpu]:
+                    self.sugg_cpufreq_l = self.sugg_cpufreq[cpu]
 
-            if self.sugg_cpufreq[cpu] > 0:
-                self.sugg_cpunum_b += 1
+                if self.sugg_cpufreq[cpu] > 0:
+                    self.sugg_cpunum_l += 1
 
-        return [self.sugg_cpufreq_ll, self.sugg_cpunum_ll,
-                self.sugg_cpufreq_l, self.sugg_cpunum_l,
-                self.sugg_cpufreq_b, self.sugg_cpunum_b,
-                self.sugg_gpufreq]
+            sugg.append(self.sugg_cpufreq_l)
+            sugg.append(self.sugg_cpunum_l)
+
+        if self.dev.cluster_2 > 0:
+            self.sugg_cpufreq_b = 0
+            for cpu in range(self.dev.cluster_0 + self.dev.cluster_1, self.dev.cluster_0 + self.dev.cluster_1 + self.dev.cluster_2):
+                if self.sugg_cpufreq_b < self.sugg_cpufreq[cpu]:
+                    self.sugg_cpufreq_b = self.sugg_cpufreq[cpu]
+
+                if self.sugg_cpufreq[cpu] > 0:
+                    self.sugg_cpunum_b += 1
+
+            sugg.append(self.sugg_cpufreq_b)
+            sugg.append(self.sugg_cpunum_b)
+
+        sugg.append(self.sugg_gpufreq)
+
+        return sugg
 
     def write_suggestion_info(self):
 

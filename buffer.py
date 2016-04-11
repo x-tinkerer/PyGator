@@ -270,7 +270,7 @@ class Buffer(object):
     cur_buff = None
     fifo_mutex = None
 
-    def __init__(self, con, apc, xml, buff_size=1024 * 1024 * 20, sock_size=200 * 1024, fifo_size=1024 * 1024):
+    def __init__(self, dev, con, apc, xml, buff_size=1024 * 1024 * 20, sock_size=200 * 1024, fifo_size=1024 * 1024):
         """Inits Buffer with blah."""
         self.mCon = con
         self.mAPC = apc
@@ -281,7 +281,7 @@ class Buffer(object):
         self.fifo_mutex = threading.Lock()
         self.buff_mutex = threading.Lock()
 
-        self.mDisplayData = DisplayData(10, xml)
+        self.mDisplayData = DisplayData(dev.cpu_num, xml)
         self.mPar = parser.Parser(self.mDisplayData)
 
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')

@@ -25,6 +25,7 @@ class M86(object):
         self.clusters = 2
         self.cluster_0 = 4
         self.cluster_1 = 4
+        self.cluster_2 = 0
 
 
 class Devices(object):

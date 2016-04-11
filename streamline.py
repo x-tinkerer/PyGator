@@ -1,9 +1,11 @@
+import os
 import sys
 import time
 import xml
 import apc
 import buffer
 import connector
+import devices
 
 from matplotlib.backends import qt_compat
 
@@ -199,11 +201,22 @@ class MainForm(QtGui.QMainWindow):
 
             suggestion = self.sl.mXls.calc_reggestion_cpu()
 
-            suggmsg = 'Min CPU:\nll_freq: %d  ll_num: %d\n' \
-                      'l_freq: %d l_num: %d\nb_freq: %d b_num: %d \n\nMin GPU Freq:   %d ' \
-                      % (suggestion[0], suggestion[1],
-                         suggestion[2], suggestion[3],
-                         suggestion[4], suggestion[5], suggestion[6])
+            if len(suggestion) == 7:
+                suggmsg = 'Min CPU:\nll_freq: %d  ll_num: %d\n' \
+                          'l_freq: %d l_num: %d\nb_freq: %d b_num: %d \n\nMin GPU Freq:   %d ' \
+                          % (suggestion[0], suggestion[1],
+                             suggestion[2], suggestion[3],
+                             suggestion[4], suggestion[5], suggestion[6])
+            elif len(suggestion) == 5:
+                suggmsg = 'Min CPU:\nl_freq: %d l_num: %d\nb_freq: %d ' \
+                          'b_num: %d \n\nMin GPU Freq:   %d ' \
+                          % (suggestion[0], suggestion[1],
+                             suggestion[2], suggestion[3],
+                             suggestion[4])
+            elif len(suggestion) == 2:
+                suggmsg = 'Min CPU:\ncpufreq: %d cpunum: %d\nMin GPU Freq:   %d ' \
+                          % (suggestion[0], suggestion[1],
+                             suggestion[2])
 
             QtGui.QMessageBox.question(self, 'Message', suggmsg)
 
@@ -225,6 +238,7 @@ class Streamline(object):
     mXls = None
 
     mPlatform = None
+    mDevice = None
     appNane = None
 
     status = -1
@@ -232,19 +246,25 @@ class Streamline(object):
     def __init__(self, platform, name):
         self.mPlatform = platform
         self.appNane = name
+
+        strtime = time.strftime("%Y-%m-%d-%H:%M:%S")
+        self.dir = self.appNane + strtime
+        os.mkdir(self.dir)
+
+        self.mDevice = devices.Devices(self.mPlatform).get_device()
         self.mCon = connector.Connector('localhost', 8084)
-        self.eventsXML = xml.EventsXML(self.mCon)
-        self.countersXML = xml.CountersXML(self.mCon)
+        # self.eventsXML = xml.EventsXML(self.mCon)
+        # self.countersXML = xml.CountersXML(self.mCon)
         self.capturedXML = xml.CapturedXML(self.mCon)
         self.sessionXML = xml.SessionXML(self.mCon)
-        self.mAPC = apc.Apc(self.mCon, '0000000000')
-        self.mBuf = buffer.Buffer(self.mCon, self.mAPC, self.capturedXML)
-        self.mXls = xls.Xls('Calc.xlsx', 10)
+        self.mAPC = apc.Apc(self.mCon, self.dir, '0000000000')
+        self.mBuf = buffer.Buffer(self.mDevice, self.mCon, self.mAPC, self.capturedXML)
+        self.mXls = xls.Xls(self.dir, 'Calc.xlsx', self.mDevice)
         self.status = -1
 
     def prepare_xml(self):
-        self.eventsXML.clean()
-        self.countersXML.clean()
+        # self.eventsXML.clean()
+        # self.countersXML.clean()
         self.capturedXML.clean()
         """This file is config for target."""
         # self.sessionXML.clean()
