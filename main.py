@@ -1,4 +1,4 @@
-import streamline
+import form
 from optparse import OptionParser
 
 if __name__ == "__main__":
@@ -18,4 +18,4 @@ if __name__ == "__main__":
     plat = options.platform
     appName = options.target
 
-    streamline.streamline_main(plat, appName)
+    form.form_main(plat, appName)
