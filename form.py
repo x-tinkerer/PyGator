@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 import numpy as np
 import streamline
 import sys
+import setting
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -113,48 +114,48 @@ class MainForm(QtGui.QMainWindow):
         self.sl = sl
         self.initUI()
 
-    def creat_menu_bar(self):
-        startAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Start', self)
-        startAction.setShortcut('Ctrl+S')
-        startAction.setStatusTip('Start Capture')
-        startAction.triggered.connect(self.startCapture)
-
-        StopAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Stop', self)
-        StopAction.setShortcut('Ctrl+D')
-        StopAction.setStatusTip('Stop Capture')
-        StopAction.triggered.connect(self.stopCapture)
-
-        ShowAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Show', self)
-        ShowAction.setShortcut('Ctrl+O')
-        ShowAction.setStatusTip('Show Calc Info')
-        ShowAction.triggered.connect(self.showCalc)
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&Option')
-        fileMenu.addAction(startAction)
-        fileMenu.addAction(StopAction)
-        fileMenu.addAction(ShowAction)
+    def show_setting_dlg(self):
+        FormSetting = QtGui.QDialog()
+        ui = setting.SettingDialog()
+        ui.setupUi(FormSetting)
+        FormSetting.show()
+        FormSetting.exec_()
 
     def initUI(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         self.setGeometry(screen)
         self.setWindowTitle('Streamline')
 
-        self.creat_menu_bar()
-        self.add_plot()
+        self.main_widget = QtGui.QWidget(self)
+        self.layout = QtGui.QVBoxLayout(self.main_widget)
 
+
+        # Create button.
+        self.btn_setting = QtGui.QPushButton("Setting", self)
+        self.btn_act = QtGui.QPushButton("Start", self)
+        self.btn_calc = QtGui.QPushButton("Calc", self)
+
+        self.button_layout = QtGui.QHBoxLayout()
+        self.button_layout.addWidget(self.btn_setting)
+        self.button_layout.addWidget(self.btn_act)
+        self.button_layout.addWidget(self.btn_calc)
+
+        self.btn_setting.clicked.connect(self.show_setting_dlg)
+        self.btn_act.clicked.connect(self.startCapture)
+        self.btn_calc.clicked.connect(self.showCalc)
+
+        # Add plots windows
+        self.plot_layout = QtGui.QVBoxLayout()
+        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=800, height=600, dpi=50, subs=8)
+        self.plot_layout.addWidget(self.dc)
+
+        self.layout.addLayout(self.button_layout)
+        self.layout.addLayout(self.plot_layout)
+
+        self.setCentralWidget(self.main_widget)
         self.statusBar().showMessage("Ready!")
 
-    def add_plot(self):
-            self.main_widget = QtGui.QWidget(self)
-            self.layout = QtGui.QVBoxLayout(self.main_widget)
-            self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=800, height=600, dpi=50, subs=8)
-            self.layout.addWidget(self.dc)
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
     def closeEvent(self, event):
-
         if self.mActivity == True:
             QtGui.QMessageBox.question(self, 'Message', "Please STOP capture first!")
             event.ignore()
@@ -164,12 +165,16 @@ class MainForm(QtGui.QMainWindow):
     def startCapture(self):
         if self.mActivity == False:
             self.sl.start()
+            self.btn_act.setText("Stop")
+            self.btn_act.clicked.connect(self.stopCapture)
             self.mActivity = True
 
     def stopCapture(self):
         if self.mActivity == True:
             self.sl.stop()
             self.dc.stop_timer()
+            self.btn_act.setText("Start")
+            self.btn_act.clicked.connect(self.startCapture)
             self.mActivity = False
 
     def showCalc(self):
