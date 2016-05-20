@@ -13,24 +13,24 @@ class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
     def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
-        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = Figure(figsize=(width - 35, height), dpi=dpi)
 
         self.plotnum = subs
         self.sl = streamline
 
         self.axes = []
         for i in range(subs):
-            self.axes.append(fig.add_subplot(subs + 4, 1, i + 1))  # For CPU CORES
+            self.axes.append(self.fig.add_subplot(subs + 4, 1, i + 1))  # For CPU CORES
             # We want the axes cleared every time plot() is called
             self.axes[i].set_title('CPU' + str(i))
             # self.axes[i].set_xticks([])   # not show x
             self.axes[i].set_xlim(0, 20000)
             self.axes[i].set_ylim(0, 2500)
-        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 1))  # FOR GPU
-        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 2))  # FOR FPS
+        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 1))  # FOR GPU
+        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 2))  # FOR FPS
 
-        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 3))  # FOR GPU
-        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 4))  # FOR FPS
+        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 3))  # FOR GPU
+        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 4))  # FOR FPS
 
         self.axes[subs].set_title('GPU')
         self.axes[subs].set_xlim(0, 20000)
@@ -46,13 +46,13 @@ class MyMplCanvas(FigureCanvas):
         self.axes[subs + 3].set_xlim(0, 20000)
         self.axes[subs + 3].set_ylim(0, 100)
 
-        fig.set_tight_layout(True)
+        self.fig.set_tight_layout(True)
         self.compute_initial_figure()
 
-        FigureCanvas.__init__(self, fig)
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setFixedSize(self, width, (subs + 4) * 100)
+        FigureCanvas.setFixedSize(self, width - 35, (subs + 4) * 100)
 
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -61,7 +61,6 @@ class MyMplCanvas(FigureCanvas):
 
     def compute_initial_figure(self):
         pass
-
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
@@ -124,7 +123,18 @@ class MainForm(QtGui.QMainWindow):
         super(MainForm, self).__init__()
         self.mActivity = False
         self.sl = sl
+        self.cblist = []
         self.initUI()
+
+
+    def chboxstate(self):
+        for i in range(14):
+            if self.cblist[i].isChecked() != self.sl.chkstatus[i]:
+                if self.cblist[i].isChecked():
+                    self.sl.chkstatus[i] = 1
+                else:
+                    self.sl.chkstatus[i] = 0
+
 
     def show_setting_dlg(self):
         FormSetting = QtGui.QDialog()
@@ -143,16 +153,47 @@ class MainForm(QtGui.QMainWindow):
 
 
         # Create button.
-        self.btn_setting = QtGui.QPushButton("Setting", self)
+        #self.btn_setting = QtGui.QPushButton("Setting", self)
         self.btn_act = QtGui.QPushButton("Start", self)
         self.btn_calc = QtGui.QPushButton("Calc", self)
 
         self.button_layout = QtGui.QHBoxLayout()
-        self.button_layout.addWidget(self.btn_setting)
+        #self.button_layout.addWidget(self.btn_setting)
         self.button_layout.addWidget(self.btn_act)
         self.button_layout.addWidget(self.btn_calc)
 
-        self.btn_setting.clicked.connect(self.show_setting_dlg)
+        for i in range(10):
+            ckb = QtGui.QCheckBox('CPU' + str(i))
+            ckb.setChecked(True)
+            ckb.stateChanged.connect(self.chboxstate)
+            self.cblist.append(ckb)
+            self.button_layout.addWidget(ckb)
+
+        ckb = QtGui.QCheckBox('GPU')
+        ckb.setChecked(True)
+        ckb.stateChanged.connect(self.chboxstate)
+        self.cblist.append(ckb)
+        self.button_layout.addWidget(ckb)
+
+        ckb = QtGui.QCheckBox('FPS')
+        ckb.setChecked(True)
+        ckb.stateChanged.connect(self.chboxstate)
+        self.cblist.append(ckb)
+        self.button_layout.addWidget(ckb)
+
+        ckb = QtGui.QCheckBox('CPU Temperature')
+        ckb.setChecked(True)
+        ckb.stateChanged.connect(self.chboxstate)
+        self.cblist.append(ckb)
+        self.button_layout.addWidget(ckb)
+
+        ckb = QtGui.QCheckBox('Board Temperature')
+        ckb.setChecked(True)
+        ckb.stateChanged.connect(self.chboxstate)
+        self.cblist.append(ckb)
+        self.button_layout.addWidget(ckb)
+
+        #self.btn_setting.clicked.connect(self.show_setting_dlg)
         self.btn_act.clicked.connect(self.startCapture)
         self.btn_calc.clicked.connect(self.showCalc)
 
@@ -161,7 +202,7 @@ class MainForm(QtGui.QMainWindow):
         self.scroll = QtGui.QScrollArea()
         self.scroll.setWidgetResizable(True)
 
-        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=40, subs=10)
+        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=50, subs=10)
 
         self.scroll.setWidget(self.dc)
         self.plot_layout.addWidget(self.scroll)

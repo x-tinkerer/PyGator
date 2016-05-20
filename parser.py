@@ -44,7 +44,7 @@ class Parser(object):
             signBits <<= 7
             count += 1
             if cur & 0x80 != 0x80:
-                more = False;
+                more = False
 
         if (signBits >> 1) & result != 0:
             result |= signBits

@@ -27,6 +27,7 @@ class Streamline(object):
     mDevice = None
     appNane = None
 
+    chkstatus = []
     status = -1
 
     def __init__(self, platform, name):
@@ -47,6 +48,9 @@ class Streamline(object):
         self.mBuf = buffer.Buffer(self.mDevice, self.mCon, self.mAPC, self.capturedXML)
         self.mXls = xls.Xls(self.dir, 'Calc.xlsx', self.mDevice)
         self.status = -1
+
+        for i in range(14):
+            self.chkstatus.append(1)
 
     def prepare_xml(self):
         # self.eventsXML.clean()

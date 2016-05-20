@@ -368,7 +368,7 @@ class Buffer(object):
         self.cur_buff_type = btype
         self.cur_buff_size = size
         self.pstatus = 2
-        # print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
+        print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
 
     def process_body(self):
         """Receive data to buff."""
