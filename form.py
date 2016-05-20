@@ -20,14 +20,17 @@ class MyMplCanvas(FigureCanvas):
 
         self.axes = []
         for i in range(subs):
-            self.axes.append(fig.add_subplot(subs + 2, 1, i + 1))  # For CPU CORES
+            self.axes.append(fig.add_subplot(subs + 4, 1, i + 1))  # For CPU CORES
             # We want the axes cleared every time plot() is called
             self.axes[i].set_title('CPU' + str(i))
             # self.axes[i].set_xticks([])   # not show x
             self.axes[i].set_xlim(0, 20000)
             self.axes[i].set_ylim(0, 2500)
-        self.axes.append(fig.add_subplot(subs + 2, 1, subs + 1))  # FOR GPU
-        self.axes.append(fig.add_subplot(subs + 2, 1, subs + 2))  # FOR FPS
+        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 1))  # FOR GPU
+        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 2))  # FOR FPS
+
+        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 3))  # FOR GPU
+        self.axes.append(fig.add_subplot(subs + 4, 1, subs + 4))  # FOR FPS
 
         self.axes[subs].set_title('GPU')
         self.axes[subs].set_xlim(0, 20000)
@@ -36,11 +39,20 @@ class MyMplCanvas(FigureCanvas):
         self.axes[subs + 1].set_xlim(0, 20000)
         self.axes[subs + 1].set_ylim(0, 100)
 
+        self.axes[subs + 2].set_title('Temperature CPU')
+        self.axes[subs + 2].set_xlim(0, 20000)
+        self.axes[subs + 2].set_ylim(0, 100)
+        self.axes[subs + 3].set_title('Temperature Board')
+        self.axes[subs + 3].set_xlim(0, 20000)
+        self.axes[subs + 3].set_ylim(0, 100)
+
         fig.set_tight_layout(True)
         self.compute_initial_figure()
 
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
+
+        FigureCanvas.setFixedSize(self, width, (subs + 4) * 100)
 
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -61,7 +73,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
-        for i in range(self.plotnum + 2):
+        for i in range(self.plotnum + 4):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
@@ -146,8 +158,13 @@ class MainForm(QtGui.QMainWindow):
 
         # Add plots windows
         self.plot_layout = QtGui.QVBoxLayout()
-        self.dc = MyDynamicMplCanvas(self.sl, self.main_widget, width=800, height=600, dpi=50, subs=8)
-        self.plot_layout.addWidget(self.dc)
+        self.scroll = QtGui.QScrollArea()
+        self.scroll.setWidgetResizable(True)
+
+        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=40, subs=10)
+
+        self.scroll.setWidget(self.dc)
+        self.plot_layout.addWidget(self.scroll)
 
         self.layout.addLayout(self.button_layout)
         self.layout.addLayout(self.plot_layout)
