@@ -1,4 +1,4 @@
-class Parser(object):
+class Parsers(object):
     mBuf = None
 
     def __init__(self, buff):

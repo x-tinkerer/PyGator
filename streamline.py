@@ -34,7 +34,7 @@ class Streamline(object):
         self.mPlatform = platform
         self.appNane = name
 
-        strtime = time.strftime("%Y-%m-%d-%H:%M:%S")
+        strtime = time.strftime("_%Y_%m_%d_%H_%M_%S")
         self.dir = self.appNane + strtime
         os.mkdir(self.dir)
 

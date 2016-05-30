@@ -1,4 +1,4 @@
-import parser
+import parsers
 import Queue
 import threading
 import time
@@ -282,7 +282,7 @@ class Buffer(object):
         self.buff_mutex = threading.Lock()
 
         self.mDisplayData = DisplayData(dev.cpu_num, xml)
-        self.mPar = parser.Parser(self.mDisplayData)
+        self.mPar = parsers.Parsers(self.mDisplayData)
 
         self.mRecv_Thread = threading.Thread(target=self.th_receive, args=(), name='gt-recv')
         self.mtran_Thread = threading.Thread(target=self.th_transfer, args=(), name='gt-tran')
