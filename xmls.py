@@ -1,4 +1,4 @@
-from lxml import etree
+import lxml
 import os
 import struct
 
@@ -106,7 +106,7 @@ class EventsXML(Xml):
 
     # counter set add
     def eventsXML(self, buff):
-        tree = etree.parse(buff)
+        tree = lxml.etree.parse(buff)
         root = tree.getroot()
 
         for category in root:
@@ -143,7 +143,7 @@ class CountersXML(Xml):
                                     62, 10])
 
     def countersXML(self, buff):
-        tree = etree.parse(buff)
+        tree = lxml.etree.parse(buff)
         root = tree.getroot()
 
         for counter in root:
@@ -167,7 +167,7 @@ class CapturedXML(Xml):
                                     62, 10])
 
     def capturedXML(self):
-        tree = etree.parse(self.xName)
+        tree = lxml.etree.parse(self.xName)
         root = tree.getroot()
 
         version = root.get("version")
