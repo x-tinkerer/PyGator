@@ -1,9 +1,9 @@
-import lxml.etree as et
+import xml.etree.ElementTree as et
 import os
 import struct
 
 
-class Xml(object):
+class Xmls(object):
     xName = None
     cmmd_buff = None
     head = None
@@ -66,9 +66,9 @@ class Xml(object):
             return os.remove(slef.xName)
 
 
-class SessionXML(Xml):
+class SessionXML(Xmls):
     def __init__(self, con, name='session.xml'):
-        Xml.__init__(self, con, name)
+        Xmls.__init__(self, con, name)
         self.cmmd_buff = bytearray([1, 104, 1, 0, 0])
         self.body = bytearray([60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
                                46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
@@ -95,7 +95,7 @@ class SessionXML(Xml):
                                101, 115, 115, 105, 111, 110, 62, 10])
 
 
-class EventsXML(Xml):
+class EventsXML(Xmls):
     def __init__(self, con, name='events.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 64, 0, 0, 0,  # HEAD
@@ -132,7 +132,7 @@ class EventsXML(Xml):
                         #     + '   name:' + name + '\n description:' + description
 
 
-class CountersXML(Xml):
+class CountersXML(Xmls):
     def __init__(self, con, name='events.xml'):
         Xml.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 66, 0, 0, 0,  # HEAD
@@ -152,7 +152,7 @@ class CountersXML(Xml):
                 # print 'Name:' + name
 
 
-class CapturedXML(Xml):
+class CapturedXML(Xmls):
     cpufreq_key = -1
     gpufreq_key = -1
     fps_key = -1
@@ -160,7 +160,7 @@ class CapturedXML(Xml):
     board_temp_key = -1
 
     def __init__(self, con, name='captured.xml'):
-        Xml.__init__(self, con, name)
+        Xmls.__init__(self, con, name)
         self.cmmd_buff = bytearray([0, 66, 0, 0, 0,  # HEAD
                                     60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49,
                                     46, 48, 34, 32, 101, 110, 99, 111, 100, 105, 110, 103, 61, 34, 85, 84,
@@ -193,7 +193,7 @@ class CapturedXML(Xml):
                     evnet = counter.get('event')
                     if evnet == None:
                         evnet = ""
-                        # print 'Key:' + key + '  Type:' + type + '   Event:' + evnet
+                        # print 'Key:' + key + '  Type:' + type + '   Event:' + event
 
                     if type == 'Linux_power_cpu_freq':
                         self.cpufreq_key = int(key, 16)
