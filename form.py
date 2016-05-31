@@ -14,7 +14,7 @@ class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
     def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
-        self.fig = Figure(figsize=(width - 35, height), dpi=dpi)
+        self.fig = Figure(figsize=(width - 50, height), dpi=dpi)
 
         self.plotnum = subs
         self.sl = streamline
@@ -53,7 +53,7 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setFixedSize(self, width - 35, (subs + 4) * 100)
+        FigureCanvas.setFixedSize(self, width - 50, (subs + 4) * 100)
 
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
