@@ -167,11 +167,13 @@ class MainForm(QtGui.QMainWindow):
         # self.btn_setting = QtGui.QPushButton("Setting", self)
         self.btn_act = QtGui.QPushButton("Start", self)
         self.btn_calc = QtGui.QPushButton("Calc", self)
+        self.btn_exit = QtGui.QPushButton("Exit", self)
 
         self.button_layout = QtGui.QHBoxLayout()
         # self.button_layout.addWidget(self.btn_setting)
         self.button_layout.addWidget(self.btn_act)
         self.button_layout.addWidget(self.btn_calc)
+        self.button_layout.addWidget(self.btn_exit)
 
         for i in range(10):
             ckb = QtGui.QCheckBox('CPU' + str(i))
@@ -207,6 +209,9 @@ class MainForm(QtGui.QMainWindow):
         # self.btn_setting.clicked.connect(self.show_setting_dlg)
         self.btn_act.clicked.connect(self.startCapture)
         self.btn_calc.clicked.connect(self.showCalc)
+        self.btn_calc.setEnabled(False)
+        self.btn_exit.clicked.connect(self.exitProcess)
+        self.btn_exit.setEnabled(False)
 
         # Add plots windows
         self.plot_layout = QtGui.QVBoxLayout()
@@ -231,6 +236,12 @@ class MainForm(QtGui.QMainWindow):
         else:
             event.accept()
 
+    def exitProcess(self):
+        if self.mActivity == True:
+            QtGui.QMessageBox.question(self, 'Message', "Please STOP capture first!")
+        else:
+            sys.exit(0)
+
     def startCapture(self):
         if self.mActivity == False:
             self.sl.start()
@@ -244,6 +255,8 @@ class MainForm(QtGui.QMainWindow):
             self.dc.stop_timer()
             self.btn_act.setText("Start")
             self.btn_act.clicked.connect(self.startCapture)
+            self.btn_calc.setEnabled(True)
+            self.btn_act.setEnabled(False)
             self.mActivity = False
 
     def showCalc(self):
@@ -253,6 +266,8 @@ class MainForm(QtGui.QMainWindow):
         elif self.sl.mBuf.is_threads_finish == False:
             QtGui.QMessageBox.question(self, 'Message', "Waiting Process Buff...")
         else:
+            self.btn_calc.setEnabled(False)
+            self.btn_exit.setEnabled(True)
             self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
             self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
             self.sl.mBuf.mDisplayData.calc_fps_list()
@@ -284,7 +299,6 @@ class MainForm(QtGui.QMainWindow):
                              suggestion[2])
 
             QtGui.QMessageBox.question(self, 'Message', suggmsg)
-
 
 def form_main(platform, name):
     sl = streamline.Streamline(platform, name)
