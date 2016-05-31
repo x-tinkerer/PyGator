@@ -9,6 +9,7 @@ import streamline
 import sys
 import setting
 
+
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
 
@@ -39,10 +40,10 @@ class MyMplCanvas(FigureCanvas):
         self.axes[subs + 1].set_xlim(0, 20000)
         self.axes[subs + 1].set_ylim(0, 100)
 
-        self.axes[subs + 2].set_title('Temperature CPU')
+        self.axes[subs + 2].set_title('CPU Temperature')
         self.axes[subs + 2].set_xlim(0, 20000)
         self.axes[subs + 2].set_ylim(0, 100)
-        self.axes[subs + 3].set_title('Temperature Board')
+        self.axes[subs + 3].set_title('Board Temperature')
         self.axes[subs + 3].set_xlim(0, 20000)
         self.axes[subs + 3].set_ylim(0, 100)
 
@@ -61,6 +62,7 @@ class MyMplCanvas(FigureCanvas):
 
     def compute_initial_figure(self):
         pass
+
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """A canvas that updates itself every second with a new plot."""
@@ -93,7 +95,6 @@ class MyDynamicMplCanvas(MyMplCanvas):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i + 1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i])
                 self.axes[i].plot(x, y, 'g')
-
                 self.axes[i].set_xlim(xminlimit, xmaxlimit)
                 self.axes[i].set_ylim(0, 2500)
 
@@ -107,10 +108,23 @@ class MyDynamicMplCanvas(MyMplCanvas):
             # Show FPS
             xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
             yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
-
             self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
             self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
             self.axes[self.plotnum + 1].set_ylim(0, 100)
+
+            # Show CPU Temp
+            xcput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[1])
+            ycput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[0])
+            self.axes[self.plotnum + 2].plot(xcput, ycput, 'r')
+            self.axes[self.plotnum + 2].set_xlim(xminlimit, xmaxlimit)
+            self.axes[self.plotnum + 2].set_ylim(40, 80)
+
+            # Show Board Temp
+            xboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[1])
+            yboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[0])
+            self.axes[self.plotnum + 3].plot(xboardt, yboardt, 'b')
+            self.axes[self.plotnum + 3].set_xlim(xminlimit, xmaxlimit)
+            self.axes[self.plotnum + 3].set_ylim(30, 60)
 
             self.draw()
 
@@ -126,7 +140,6 @@ class MainForm(QtGui.QMainWindow):
         self.cblist = []
         self.initUI()
 
-
     def chboxstate(self):
         for i in range(14):
             if self.cblist[i].isChecked() != self.sl.chkstatus[i]:
@@ -134,7 +147,6 @@ class MainForm(QtGui.QMainWindow):
                     self.sl.chkstatus[i] = 1
                 else:
                     self.sl.chkstatus[i] = 0
-
 
     def show_setting_dlg(self):
         FormSetting = QtGui.QDialog()
@@ -151,14 +163,13 @@ class MainForm(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget(self)
         self.layout = QtGui.QVBoxLayout(self.main_widget)
 
-
         # Create button.
-        #self.btn_setting = QtGui.QPushButton("Setting", self)
+        # self.btn_setting = QtGui.QPushButton("Setting", self)
         self.btn_act = QtGui.QPushButton("Start", self)
         self.btn_calc = QtGui.QPushButton("Calc", self)
 
         self.button_layout = QtGui.QHBoxLayout()
-        #self.button_layout.addWidget(self.btn_setting)
+        # self.button_layout.addWidget(self.btn_setting)
         self.button_layout.addWidget(self.btn_act)
         self.button_layout.addWidget(self.btn_calc)
 
@@ -193,7 +204,7 @@ class MainForm(QtGui.QMainWindow):
         self.cblist.append(ckb)
         self.button_layout.addWidget(ckb)
 
-        #self.btn_setting.clicked.connect(self.show_setting_dlg)
+        # self.btn_setting.clicked.connect(self.show_setting_dlg)
         self.btn_act.clicked.connect(self.startCapture)
         self.btn_calc.clicked.connect(self.showCalc)
 
@@ -281,4 +292,3 @@ def form_main(platform, name):
     form = MainForm(sl)
     form.show()
     sys.exit(app.exec_())
-

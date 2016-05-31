@@ -1,4 +1,4 @@
-from lxml import etree
+import lxml.etree as et
 import os
 import struct
 
@@ -106,7 +106,7 @@ class EventsXML(Xml):
 
     # counter set add
     def eventsXML(self, buff):
-        tree = etree.parse(buff)
+        tree = et.parse(buff)
         root = tree.getroot()
 
         for category in root:
@@ -143,7 +143,7 @@ class CountersXML(Xml):
                                     62, 10])
 
     def countersXML(self, buff):
-        tree = etree.parse(buff)
+        tree = et.parse(buff)
         root = tree.getroot()
 
         for counter in root:
@@ -156,6 +156,8 @@ class CapturedXML(Xml):
     cpufreq_key = -1
     gpufreq_key = -1
     fps_key = -1
+    cpu_temp_key = -1
+    board_temp_key = -1
 
     def __init__(self, con, name='captured.xml'):
         Xml.__init__(self, con, name)
@@ -167,7 +169,7 @@ class CapturedXML(Xml):
                                     62, 10])
 
     def capturedXML(self):
-        tree = etree.parse(self.xName)
+        tree = et.parse(self.xName)
         root = tree.getroot()
 
         version = root.get("version")
@@ -201,3 +203,9 @@ class CapturedXML(Xml):
 
                     if type == 'Linux_power_fps':
                         self.fps_key = int(key, 16)
+
+                    if type == 'Linux_power_cpu_temp':
+                        self.cpu_temp_key = int(key, 16)
+
+                    if type == 'Linux_power_board_temp':
+                        self.board_temp_key = int(key, 16)

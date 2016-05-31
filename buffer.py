@@ -54,7 +54,29 @@ class FpsData(object):
         self.fpsinfo = {}
 
 
-class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
+class CpuTempData(object):
+    def __init__(self, key):
+        # temp[0], ts[0]
+        self.cpu_temp_lock = threading.Lock()
+        self.cpu_temp = [[], []]
+
+        # For calc
+        self.cpu_temp_key = key
+        self.cputempinfo = {}
+
+
+class BoardTempData(object):
+    def __init__(self, key):
+        # temp[0], ts[0]
+        self.board_temp_lock = threading.Lock()
+        self.board_temp = [[], []]
+
+        # For calc
+        self.board_temp_key = key
+        self.boardtempinfo = {}
+
+
+class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData, CpuTempData, BoardTempData):
     def __init__(self, num, xml):
         self.cpunum = num
         self.lastts = -1
@@ -62,11 +84,15 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData):
         CpuUsageData.__init__(self, num)
         GpuFreqData.__init__(self, xml.gpufreq_key)
         FpsData.__init__(self, xml.fps_key)
+        CpuTempData.__init__(self, xml.cpu_temp_key)
+        BoardTempData.__init__(self, xml.board_temp_key)
 
     def set_keys(self, xml):
         self.cpufreq_key = xml.cpufreq_key
         self.gpufreq_key = xml.gpufreq_key
         self.fps_key = xml.fps_key
+        self.cpu_temp_key = xml.cpu_temp_key
+        self.board_temp_key = xml.board_temp_key
 
     def calc_cpu_freq_list(self):
         """
@@ -368,7 +394,7 @@ class Buffer(object):
         self.cur_buff_type = btype
         self.cur_buff_size = size
         self.pstatus = 2
-        print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
+        # print 'Buf Type: ' + str(btype) + '   Buff size: ' + str(size)
 
     def process_body(self):
         """Receive data to buff."""

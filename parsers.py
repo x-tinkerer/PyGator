@@ -190,6 +190,32 @@ class Parsers(object):
                     self.mDisplayData.fps[1].insert(ins_index + 1, Timestamp / 1000000)
                 self.mDisplayData.fps_lock.release()
 
+            elif Key == self.mDisplayData.cpu_temp_key:  # cpu temp
+                self.mDisplayData.cpu_temp_lock.acquire()
+                ins_index = len(self.mDisplayData.cpu_temp[1]) - 1
+                if ins_index < 0:
+                    self.mDisplayData.cpu_temp[0].append(Value / 1000)
+                    self.mDisplayData.cpu_temp[1].append(Timestamp / 1000000)
+                else:
+                    while ins_index >= 0 and self.mDisplayData.cpu_temp[1][ins_index] > Timestamp / 1000000:
+                        ins_index -= 1
+                    self.mDisplayData.cpu_temp[0].insert(ins_index + 1, Value / 1000)
+                    self.mDisplayData.cpu_temp[1].insert(ins_index + 1, Timestamp / 1000000)
+                self.mDisplayData.cpu_temp_lock.release()
+
+            elif Key == self.mDisplayData.board_temp_key:  # board temp
+                self.mDisplayData.board_temp_lock.acquire()
+                ins_index = len(self.mDisplayData.board_temp[1]) - 1
+                if ins_index < 0:
+                    self.mDisplayData.board_temp[0].append(Value / 1000)
+                    self.mDisplayData.board_temp[1].append(Timestamp / 1000000)
+                else:
+                    while ins_index >= 0 and self.mDisplayData.board_temp[1][ins_index] > Timestamp / 1000000:
+                        ins_index -= 1
+                    self.mDisplayData.board_temp[0].insert(ins_index + 1, Value / 1000)
+                    self.mDisplayData.board_temp[1].insert(ins_index + 1, Timestamp / 1000000)
+                self.mDisplayData.board_temp_lock.release()
+
             self.mDisplayData.lastts = Timestamp / 1000000
 
     def handleBlock(self):
