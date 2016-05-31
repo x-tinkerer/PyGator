@@ -1,6 +1,6 @@
 import os
 import time
-import xmls
+import xml
 import xls
 import apc
 import buffer
@@ -40,10 +40,10 @@ class Streamline(object):
 
         self.mDevice = devices.Devices(self.mPlatform).get_device()
         self.mCon = connector.Connector('localhost', 8084)
-        # self.eventsXML = xmls.EventsXML(self.mCon)
-        # self.countersXML = xmls.CountersXML(self.mCon)
-        self.capturedXML = xmls.CapturedXML(self.mCon)
-        self.sessionXML = xmls.SessionXML(self.mCon)
+        # self.eventsXML = xml.EventsXML(self.mCon)
+        # self.countersXML = xml.CountersXML(self.mCon)
+        self.capturedXML = xml.CapturedXML(self.mCon)
+        self.sessionXML = xml.SessionXML(self.mCon)
         self.mAPC = apc.Apc(self.mCon, self.dir, '0000000000')
         self.mBuf = buffer.Buffer(self.mDevice, self.mCon, self.mAPC, self.capturedXML)
         self.mXls = xls.Xls(self.dir, 'Calc.xlsx', self.mDevice)
