@@ -52,6 +52,7 @@ class FpsData(object):
         # For calc
         self.fps_key = key
         self.fpsinfo = {}
+        self.fpscalc = []
 
 
 class CpuTempData(object):
@@ -62,7 +63,7 @@ class CpuTempData(object):
 
         # For calc
         self.cpu_temp_key = key
-        self.cputempinfo = {}
+        self.cpu_temp_info = []
 
 
 class BoardTempData(object):
@@ -73,7 +74,7 @@ class BoardTempData(object):
 
         # For calc
         self.board_temp_key = key
-        self.boardtempinfo = {}
+        self.board_temp_info = []
 
 
 class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData, CpuTempData, BoardTempData):
@@ -136,6 +137,49 @@ class DisplayData(CpuFreqData, CpuUsageData, GpuFreqData, FpsData, CpuTempData, 
 
             lastkey = value
             lastts = ts
+
+    def calc_cpu_temp_info(self):
+        """
+        Calc cpu temperature list.
+        """
+        mintemp = 100
+        maxtemp = 0
+        total = 0
+        for index, value in enumerate(self.cpu_temp[0]):  # this is cpu temp
+            if value > maxtemp:
+                maxtemp = value
+
+            if value < mintemp:
+                mintemp = value
+
+            total += value
+
+        avg = total/self.cpu_temp[0].__len__()
+        self.cpu_temp_info.append(mintemp)
+        self.cpu_temp_info.append(maxtemp)
+        self.cpu_temp_info.append(avg)
+
+    def calc_board_temp_info(self):
+        """
+        Calc board temperature list.
+        """
+        mintemp = 100
+        maxtemp = 0
+        total = 0
+        for index, value in enumerate(self.board_temp[0]):  # this is cpu temp
+            if value > maxtemp:
+                maxtemp = value
+
+            if value < mintemp:
+                mintemp = value
+
+            total += value
+
+        avg = total/self.board_temp[0].__len__()
+        self.board_temp_info.append(mintemp)
+        self.board_temp_info.append(maxtemp)
+        self.board_temp_info.append(avg)
+
 
     def calc_fps_list(self):
 

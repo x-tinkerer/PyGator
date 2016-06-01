@@ -8,6 +8,8 @@ class Xls(object):
     cpuinfo = None
     gpuinfo = None
     fpsinfo = None
+    cputemp = None
+    boardtemp = None
 
     sugg_cpufreq = []
     sugg_cpufreq_ll = 0
@@ -29,6 +31,7 @@ class Xls(object):
         self.cpusheet = self.workbook.add_worksheet()
         self.gpusheet = self.workbook.add_worksheet()
         self.fpssheet = self.workbook.add_worksheet()
+        self.tempsheet = self.workbook.add_worksheet()
 
         bold = self.workbook.add_format({'bold': True})
 
@@ -43,6 +46,9 @@ class Xls(object):
 
         fheadings = ['FPS', 'Counts']
         self.fpssheet.write_row('A1', fheadings, bold)
+
+        fheadings = ['Min Temp', 'Max Temp', 'Avg Temp']
+        self.tempsheet.write_row('A1', fheadings, bold)
 
     def writeCpuinfo(self, cpuinfo):
 
@@ -139,6 +145,47 @@ class Xls(object):
         # Insert the chart into the worksheet (with an offset).
         chart.set_size({'width': 300, 'height': 250})
         self.showsheet.insert_chart('C2', chart, {'x_offset': 500, 'y_offset': 500})
+
+    def writeTempinfo(self, cputemp, boardtemp):
+
+        self.cputemp = cputemp
+        self.boardtemp = boardtemp
+
+        # CPU Temperature
+        self.tempsheet.write(1, 0, cputemp[0])
+        self.tempsheet.write(1, 1, cputemp[1])
+        self.tempsheet.write(1, 2, cputemp[2])
+
+        # Board Temperature
+        self.tempsheet.write(2, 0, boardtemp[0])
+        self.tempsheet.write(2, 1, boardtemp[1])
+        self.tempsheet.write(2, 2, boardtemp[2])
+
+
+        chart = self.workbook.add_chart({'type': 'bar'})
+
+        # Configure the series. Note the use of the list syntax to define ranges:
+        chart.add_series({
+            'name': 'CPU',
+            'categories': ['Sheet5', 1, 0, 1, 2],
+            'values': ['Sheet5', 1, 0, 1, 2],
+        })
+
+        chart.add_series({
+            'name': 'Board',
+            'categories': ['Sheet5', 1, 0, 1, 2],
+            'values': ['Sheet5', 2, 0, 2, 2],
+        })
+
+        # Add a title.
+        chart.set_title({'name': 'Temperature'})
+
+        # Set an Excel chart style. Colors with white outline and shadow.
+        chart.set_style(10)
+
+        # Insert the chart into the worksheet (with an offset).
+        chart.set_size({'width': 300, 'height': 250})
+        self.showsheet.insert_chart('C2', chart, {'x_offset': 900, 'y_offset': 500})
 
     def finish(self):
         self.workbook.close()

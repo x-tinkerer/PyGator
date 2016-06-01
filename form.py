@@ -71,7 +71,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         self.updatetimer = QtCore.QTimer(self)
         self.updatetimer.timeout.connect(self.update_figure)
-        self.updatetimer.start(1000)
+        self.updatetimer.start(2000)
 
     def compute_initial_figure(self):
         for i in range(self.plotnum + 4):
@@ -271,10 +271,13 @@ class MainForm(QtGui.QMainWindow):
             self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
             self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
             self.sl.mBuf.mDisplayData.calc_fps_list()
+            self.sl.mBuf.mDisplayData.calc_cpu_temp_info()
+            self.sl.mBuf.mDisplayData.calc_board_temp_info()
 
             self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
             self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
             self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
+            self.sl.mXls.writeTempinfo(self.sl.mBuf.mDisplayData.cpu_temp_info, self.sl.mBuf.mDisplayData.board_temp_info)
             self.sl.mXls.write_suggestion_info()
             self.sl.mXls.finish()
             QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")
