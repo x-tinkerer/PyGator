@@ -71,7 +71,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         self.updatetimer = QtCore.QTimer(self)
         self.updatetimer.timeout.connect(self.update_figure)
-        self.updatetimer.start(2000)
+        self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
         for i in range(self.plotnum + 4):

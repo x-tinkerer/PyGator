@@ -348,8 +348,6 @@ class Buffer(object):
         self.bSize = buff_size
         self.mBuff = RingBuffer(buff_size)
         self.mFifo = Queue.Queue(fifo_size)
-        self.fifo_mutex = threading.Lock()
-        self.buff_mutex = threading.Lock()
 
         self.mDisplayData = DisplayData(dev.cpu_num, xml)
         self.mPar = parsers.Parsers(self.mDisplayData)
@@ -369,9 +367,8 @@ class Buffer(object):
                 self.rstatus = 1
                 self.mAPC.writeApc(self.mData)
                 # print 'Recv ' + str(num) + 'bytes from gatord'
-                self.fifo_mutex.acquire()
                 self.mFifo.put(self.mData)
-                self.fifo_mutex.release()
+
             else:
                 time.sleep(0.01)
                 self.rstatus = 0
@@ -382,42 +379,33 @@ class Buffer(object):
     def th_transfer(self):
         while self.mActivity or self.mFifo.qsize() > 0:
             if self.mFifo.empty():
-                time.sleep(0.01)
+                time.sleep(0.02)
             else:
-                self.fifo_mutex.acquire()
                 tmpbuf = self.mFifo.get()
-                self.fifo_mutex.release()
 
-                self.buff_mutex.acquire()
                 if self.bSize - self.mBuff.len() < len(tmpbuf):
-                    time.sleep(0.01)
+                    time.sleep(0.02)
                 else:
                     self.mBuff.put(tmpbuf)
 
                     if self.pstatus == 0:
                         self.pstatus = 1
-                self.buff_mutex.release()
-
         self.mTstatus = True
         sys.exit(0)
 
     def th_process(self):
         while self.mActivity or self.mBuff.len() > 0:
             # Parse and collection
-            self.buff_mutex.acquire()
             if self.pstatus == 1 and self.mBuff.len() >= 5:
                 self.process_head()
-                self.buff_mutex.release()
             elif self.pstatus == 2 and self.mBuff.len() >= self.cur_buff_size:
                 self.process_body()
-                self.buff_mutex.release()
             else:
-                self.buff_mutex.release()
                 if self.mActivity == False:
                     self.exit_count += 1
                 if self.exit_count > 30:  # 3 sec
                     break
-                time.sleep(0.1)
+                time.sleep(0.02)
 
         self.mPstatus = True
         sys.exit(0)
