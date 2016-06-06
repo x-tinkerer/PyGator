@@ -218,7 +218,7 @@ class MainForm(QtGui.QMainWindow):
         self.scroll = QtGui.QScrollArea()
         self.scroll.setWidgetResizable(True)
 
-        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=50, subs=10)
+        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=50, subs=self.sl.mDevice.cpu_num)
 
         self.scroll.setWidget(self.dc)
         self.plot_layout.addWidget(self.scroll)
