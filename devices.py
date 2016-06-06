@@ -17,6 +17,14 @@ class M95(object):
         self.cluster_1 = 4
         self.cluster_2 = 2
 
+class MA02(object):
+    def __init__(self):
+        self.dev = 'MA02'
+        self.cpu_num = 8
+        self.clusters = 2
+        self.cluster_0 = 4
+        self.cluster_1 = 4
+        self.cluster_2 = 0
 
 class M86(object):
     def __init__(self):
@@ -39,3 +47,5 @@ class Devices(object):
             return M86()
         if self.dev == 'M95' or self.dev == 'm95':
             return M95()
+        if self.dev == 'MA02' or self.dev == 'ma02':
+            return MA02()
