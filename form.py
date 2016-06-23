@@ -16,36 +16,51 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, streamline, parent=None, width=5, height=4, dpi=50, subs=1):
         self.fig = Figure(figsize=(width - 50, height), dpi=dpi)
 
-        self.plotnum = subs
+        pos = 0
+
         self.sl = streamline
+        self.subs = subs
+        self.cpunum = self.sl.mDevice.cpu_num
+
+        self.gpu_pos = 0
+        self.fps_pos = 0
+        self.temp_pos = 0
 
         self.axes = []
-        for i in range(subs):
-            self.axes.append(self.fig.add_subplot(subs + 4, 1, i + 1))  # For CPU CORES
+        for i in range(self.cpunum):
+            self.axes.append(self.fig.add_subplot(self.subs, 1, i + 1))  # For CPU CORES
             # We want the axes cleared every time plot() is called
             self.axes[i].set_title('CPU' + str(i))
             # self.axes[i].set_xticks([])   # not show x
             self.axes[i].set_xlim(0, 20000)
             self.axes[i].set_ylim(0, 2500)
-        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 1))  # FOR GPU
-        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 2))  # FOR FPS
 
-        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 3))  # FOR GPU
-        self.axes.append(self.fig.add_subplot(subs + 4, 1, subs + 4))  # FOR FPS
+        if self.sl.mDevice.show_gpu == 1:
+            self.gpu_pos = pos
+            self.axes.append(self.fig.add_subplot(self.subs, 1, self.cpunum + pos + 1))  # FOR GPU
+            self.axes[self.cpunum + self.gpu_pos].set_title('GPU')
+            self.axes[self.cpunum + self.gpu_pos].set_xlim(0, 20000)
+            self.axes[self.cpunum + self.gpu_pos].set_ylim(0, 850)
+            pos += 1
 
-        self.axes[subs].set_title('GPU')
-        self.axes[subs].set_xlim(0, 20000)
-        self.axes[subs].set_ylim(0, 850)
-        self.axes[subs + 1].set_title('FPS')
-        self.axes[subs + 1].set_xlim(0, 20000)
-        self.axes[subs + 1].set_ylim(0, 100)
+        if self.sl.mDevice.show_fps == 1:
+            self.fps_pos = pos
+            self.axes.append(self.fig.add_subplot(self.subs, 1, self.cpunum + self.fps_pos + 1))  # FOR FPS
+            self.axes[self.cpunum + self.fps_pos].set_title('FPS')
+            self.axes[self.cpunum + self.fps_pos].set_xlim(0, 20000)
+            self.axes[self.cpunum + self.fps_pos].set_ylim(0, 100)
+            pos += 1
 
-        self.axes[subs + 2].set_title('CPU Temperature')
-        self.axes[subs + 2].set_xlim(0, 20000)
-        self.axes[subs + 2].set_ylim(0, 100)
-        self.axes[subs + 3].set_title('Board Temperature')
-        self.axes[subs + 3].set_xlim(0, 20000)
-        self.axes[subs + 3].set_ylim(0, 100)
+        if self.sl.mDevice.show_temp == 1:
+            self.temp_pos = pos
+            self.axes.append(self.fig.add_subplot(self.subs, 1, self.cpunum + self.temp_pos + 1))  # FOR CPU TEMP
+            self.axes[self.cpunum + self.temp_pos].set_title('CPU Temperature')
+            self.axes[self.cpunum + self.temp_pos].set_xlim(0, 20000)
+            self.axes[self.cpunum + self.temp_pos].set_ylim(0, 100)
+            self.axes.append(self.fig.add_subplot(self.subs, 1, self.cpunum + self.temp_pos + 2))  # FOR BOARD TEMP
+            self.axes[self.cpunum + self.temp_pos + 1].set_title('Board Temperature')
+            self.axes[self.cpunum + self.temp_pos + 1].set_xlim(0, 20000)
+            self.axes[self.cpunum + self.temp_pos + 1].set_ylim(0, 100)
 
         self.fig.set_tight_layout(True)
         self.compute_initial_figure()
@@ -53,7 +68,7 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setFixedSize(self, width - 50, (subs + 4) * 100)
+        FigureCanvas.setFixedSize(self, width - 50, subs * 100)
 
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -74,7 +89,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.updatetimer.start(1000)
 
     def compute_initial_figure(self):
-        for i in range(self.plotnum + 4):
+        for i in range(self.cpunum):
             self.axes[i].plot([], [], 'g')
 
     def update_figure(self):
@@ -91,7 +106,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
                 xmaxlimit = 20000
 
             # Show CPU FREQ
-            for i in range(self.plotnum):
+            for i in range(self.cpunum):
                 x = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i + 1])
                 y = np.array(self.sl.mBuf.mDisplayData.cpufreqshow[2 * i])
                 self.axes[i].plot(x, y, 'g')
@@ -99,32 +114,35 @@ class MyDynamicMplCanvas(MyMplCanvas):
                 self.axes[i].set_ylim(0, 2500)
 
             # Show GPU FREQ
-            xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[1])
-            ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[0])
-            self.axes[self.plotnum].plot(xgpu, ygpu, 'r')
-            self.axes[self.plotnum].set_xlim(xminlimit, xmaxlimit)
-            self.axes[self.plotnum].set_ylim(0, 850)
+            if self.sl.mDevice.show_gpu == 1:
+                xgpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[1])
+                ygpu = np.array(self.sl.mBuf.mDisplayData.gpufreqshow[0])
+                self.axes[self.cpunum + self.gpu_pos].plot(xgpu, ygpu, 'r')
+                self.axes[self.cpunum + self.gpu_pos].set_xlim(xminlimit, xmaxlimit)
+                self.axes[self.cpunum + self.gpu_pos].set_ylim(0, 850)
 
             # Show FPS
-            xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
-            yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
-            self.axes[self.plotnum + 1].plot(xfps, yfps, 'b')
-            self.axes[self.plotnum + 1].set_xlim(xminlimit, xmaxlimit)
-            self.axes[self.plotnum + 1].set_ylim(0, 100)
+            if self.sl.mDevice.show_fps == 1:
+                xfps = np.array(self.sl.mBuf.mDisplayData.fps[1])
+                yfps = np.array(self.sl.mBuf.mDisplayData.fps[0])
+                self.axes[self.cpunum + self.fps_pos].plot(xfps, yfps, 'b')
+                self.axes[self.cpunum + self.fps_pos].set_xlim(xminlimit, xmaxlimit)
+                self.axes[self.cpunum + self.fps_pos].set_ylim(0, 100)
 
-            # Show CPU Temp
-            xcput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[1])
-            ycput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[0])
-            self.axes[self.plotnum + 2].plot(xcput, ycput, 'r')
-            self.axes[self.plotnum + 2].set_xlim(xminlimit, xmaxlimit)
-            self.axes[self.plotnum + 2].set_ylim(40, 80)
+            if self.sl.mDevice.show_temp == 1:
+                # Show CPU Temp
+                xcput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[1])
+                ycput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[0])
+                self.axes[self.cpunum + self.temp_pos].plot(xcput, ycput, 'r')
+                self.axes[self.cpunum + self.temp_pos].set_xlim(xminlimit, xmaxlimit)
+                self.axes[self.cpunum + self.temp_pos].set_ylim(40, 80)
 
-            # Show Board Temp
-            xboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[1])
-            yboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[0])
-            self.axes[self.plotnum + 3].plot(xboardt, yboardt, 'b')
-            self.axes[self.plotnum + 3].set_xlim(xminlimit, xmaxlimit)
-            self.axes[self.plotnum + 3].set_ylim(30, 60)
+                # Show Board Temp
+                xboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[1])
+                yboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[0])
+                self.axes[self.cpunum + self.temp_pos + 1].plot(xboardt, yboardt, 'b')
+                self.axes[self.cpunum + self.temp_pos + 1].set_xlim(xminlimit, xmaxlimit)
+                self.axes[self.cpunum + self.temp_pos + 1].set_ylim(30, 60)
 
             self.draw()
 
@@ -141,7 +159,7 @@ class MainForm(QtGui.QMainWindow):
         self.initUI()
 
     def chboxstate(self):
-        for i in range(14):
+        for i in range(self.sl.mDevice.show_num):
             if self.cblist[i].isChecked() != self.sl.chkstatus[i]:
                 if self.cblist[i].isChecked():
                     self.sl.chkstatus[i] = 1
@@ -175,36 +193,39 @@ class MainForm(QtGui.QMainWindow):
         self.button_layout.addWidget(self.btn_calc)
         self.button_layout.addWidget(self.btn_exit)
 
-        for i in range(10):
+        for i in range(self.sl.mDevice.cpu_num):
             ckb = QtGui.QCheckBox('CPU' + str(i))
             ckb.setChecked(True)
             ckb.stateChanged.connect(self.chboxstate)
             self.cblist.append(ckb)
             self.button_layout.addWidget(ckb)
 
-        ckb = QtGui.QCheckBox('GPU')
-        ckb.setChecked(True)
-        ckb.stateChanged.connect(self.chboxstate)
-        self.cblist.append(ckb)
-        self.button_layout.addWidget(ckb)
+        if self.sl.mDevice.show_gpu == 1:
+            ckb = QtGui.QCheckBox('GPU')
+            ckb.setChecked(True)
+            ckb.stateChanged.connect(self.chboxstate)
+            self.cblist.append(ckb)
+            self.button_layout.addWidget(ckb)
 
-        ckb = QtGui.QCheckBox('FPS')
-        ckb.setChecked(True)
-        ckb.stateChanged.connect(self.chboxstate)
-        self.cblist.append(ckb)
-        self.button_layout.addWidget(ckb)
+        if self.sl.mDevice.show_fps == 1:
+            ckb = QtGui.QCheckBox('FPS')
+            ckb.setChecked(True)
+            ckb.stateChanged.connect(self.chboxstate)
+            self.cblist.append(ckb)
+            self.button_layout.addWidget(ckb)
 
-        ckb = QtGui.QCheckBox('CPU Temperature')
-        ckb.setChecked(True)
-        ckb.stateChanged.connect(self.chboxstate)
-        self.cblist.append(ckb)
-        self.button_layout.addWidget(ckb)
+        if self.sl.mDevice.show_temp == 1:
+            ckb = QtGui.QCheckBox('CPU Temperature')
+            ckb.setChecked(True)
+            ckb.stateChanged.connect(self.chboxstate)
+            self.cblist.append(ckb)
+            self.button_layout.addWidget(ckb)
 
-        ckb = QtGui.QCheckBox('Board Temperature')
-        ckb.setChecked(True)
-        ckb.stateChanged.connect(self.chboxstate)
-        self.cblist.append(ckb)
-        self.button_layout.addWidget(ckb)
+            ckb = QtGui.QCheckBox('Board Temperature')
+            ckb.setChecked(True)
+            ckb.stateChanged.connect(self.chboxstate)
+            self.cblist.append(ckb)
+            self.button_layout.addWidget(ckb)
 
         # self.btn_setting.clicked.connect(self.show_setting_dlg)
         self.btn_act.clicked.connect(self.startCapture)
@@ -218,7 +239,7 @@ class MainForm(QtGui.QMainWindow):
         self.scroll = QtGui.QScrollArea()
         self.scroll.setWidgetResizable(True)
 
-        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=50, subs=self.sl.mDevice.cpu_num)
+        self.dc = MyDynamicMplCanvas(self.sl, self.scroll, width=self.width(), height=self.height(), dpi=50, subs=self.sl.mDevice.show_num)
 
         self.scroll.setWidget(self.dc)
         self.plot_layout.addWidget(self.scroll)
@@ -269,15 +290,24 @@ class MainForm(QtGui.QMainWindow):
             self.btn_calc.setEnabled(False)
             self.btn_exit.setEnabled(True)
             self.sl.mBuf.mDisplayData.calc_cpu_freq_list()
-            self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
-            self.sl.mBuf.mDisplayData.calc_fps_list()
-            self.sl.mBuf.mDisplayData.calc_cpu_temp_info()
-            self.sl.mBuf.mDisplayData.calc_board_temp_info()
+            if self.sl.mDevice.show_gpu == 1:
+                self.sl.mBuf.mDisplayData.calc_gpu_freq_list()
+            if self.sl.mDevice.show_fps == 1:
+                self.sl.mBuf.mDisplayData.calc_fps_list()
+            if self.sl.mDevice.show_temp == 1:
+                self.sl.mBuf.mDisplayData.calc_cpu_temp_info()
+                self.sl.mBuf.mDisplayData.calc_board_temp_info()
 
             self.sl.mXls.writeCpuinfo(self.sl.mBuf.mDisplayData.cpuinfo)
-            self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
-            self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
-            self.sl.mXls.writeTempinfo(self.sl.mBuf.mDisplayData.cpu_temp_info, self.sl.mBuf.mDisplayData.board_temp_info)
+
+            if self.sl.mDevice.show_gpu == 1:
+                self.sl.mXls.writeGpuinfo(self.sl.mBuf.mDisplayData.gpuinfo)
+
+            if self.sl.mDevice.show_fps == 1:
+                self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
+
+            if self.sl.mDevice.show_temp == 1:
+                self.sl.mXls.writeTempinfo(self.sl.mBuf.mDisplayData.cpu_temp_info, self.sl.mBuf.mDisplayData.board_temp_info)
             self.sl.mXls.write_suggestion_info()
             self.sl.mXls.finish()
             QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")

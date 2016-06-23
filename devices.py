@@ -7,6 +7,11 @@ class M80(object):
         self.cluster_1 = 4
         self.cluster_2 = 2
 
+        self.show_cpu = 1
+        self.show_gpu = 1
+        self.show_fps = 1
+        self.show_temp = 1
+        self.show_num = 14
 
 class M95(object):
     def __init__(self):
@@ -17,6 +22,12 @@ class M95(object):
         self.cluster_1 = 4
         self.cluster_2 = 2
 
+        self.show_cpu = 1
+        self.show_gpu = 1
+        self.show_fps = 1
+        self.show_temp = 1
+        self.show_num = 14
+
 class MA02(object):
     def __init__(self):
         self.dev = 'MA02'
@@ -26,6 +37,12 @@ class MA02(object):
         self.cluster_1 = 4
         self.cluster_2 = 0
 
+        self.show_cpu = 1
+        self.show_gpu = 1
+        self.show_fps = 1
+        self.show_temp = 1
+        self.show_num = 12
+
 class M86(object):
     def __init__(self):
         self.dev = 'M86'
@@ -34,6 +51,12 @@ class M86(object):
         self.cluster_0 = 4
         self.cluster_1 = 4
         self.cluster_2 = 0
+
+        self.show_cpu = 1
+        self.show_gpu = 1
+        self.show_fps = 0
+        self.show_temp = 0
+        self.show_num = 10
 
 
 class Devices(object):
