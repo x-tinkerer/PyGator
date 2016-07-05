@@ -194,7 +194,7 @@ class MainForm(QtGui.QMainWindow):
         #CreateEditText
         self.text = QtGui.QLineEdit()
         self.text.setText("Game")
-        self.test.setMaxLength(10)
+        #self.test.setMaxLength(10)
 
         self.button_layout = QtGui.QHBoxLayout()
         # self.button_layout.addWidget(self.btn_setting)
