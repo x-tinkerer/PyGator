@@ -8,7 +8,10 @@ import numpy as np
 import streamline
 import sys
 import setting
-
+import multiprocessing
+import os
+import time
+import thread
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -186,12 +189,20 @@ class MainForm(QtGui.QMainWindow):
         self.btn_act = QtGui.QPushButton("Start", self)
         self.btn_calc = QtGui.QPushButton("Calc", self)
         self.btn_exit = QtGui.QPushButton("Exit", self)
+        self.btn_restart = QtGui.QPushButton("Restart", self)
+
+        #CreateEditText
+        self.text = QtGui.QLineEdit()
+        self.text.setText("Game")
+        self.test.setMaxLength(10)
 
         self.button_layout = QtGui.QHBoxLayout()
         # self.button_layout.addWidget(self.btn_setting)
         self.button_layout.addWidget(self.btn_act)
         self.button_layout.addWidget(self.btn_calc)
         self.button_layout.addWidget(self.btn_exit)
+        self.button_layout.addWidget(self.btn_restart)
+        #self.button_layout.addWidget(self.text)
 
         for i in range(self.sl.mDevice.cpu_num):
             ckb = QtGui.QCheckBox('CPU' + str(i))
@@ -233,6 +244,8 @@ class MainForm(QtGui.QMainWindow):
         self.btn_calc.setEnabled(False)
         self.btn_exit.clicked.connect(self.exitProcess)
         self.btn_exit.setEnabled(False)
+        self.btn_restart.clicked.connect(self.restartProcess)
+        self.btn_restart.setEnabled(False)
 
         # Add plots windows
         self.plot_layout = QtGui.QVBoxLayout()
@@ -332,6 +345,19 @@ class MainForm(QtGui.QMainWindow):
                              suggestion[2])
 
             QtGui.QMessageBox.question(self, 'Message', suggmsg)
+            self.btn_restart.setEnabled(True)
+
+    def restartProcess(self):
+        if self.mActivity == True:
+            QtGui.QMessageBox.question(self, 'Message', "Please STOP capture first!")
+        else:
+            self.sl = streamline.Streamline(self.sl.mPlatform, self.sl.appNane)
+            self.cblist = []
+            self.initUI()
+            self.sl.start()
+            self.btn_act.setText("Stop")
+            self.btn_act.clicked.connect(self.stopCapture)
+            self.mActivity = True
 
 def form_main(platform, name):
     sl = streamline.Streamline(platform, name)
@@ -339,3 +365,5 @@ def form_main(platform, name):
     form = MainForm(sl)
     form.show()
     sys.exit(app.exec_())
+
+
