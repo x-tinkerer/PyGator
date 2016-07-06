@@ -8,10 +8,6 @@ import numpy as np
 import streamline
 import sys
 import setting
-import multiprocessing
-import os
-import time
-import thread
 
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
@@ -193,8 +189,9 @@ class MainForm(QtGui.QMainWindow):
 
         #CreateEditText
         self.text = QtGui.QLineEdit()
-        self.text.setText("Game")
-        #self.test.setMaxLength(10)
+        self.text.setText(self.sl.appNane)
+        self.text.setFixedWidth(100)
+
 
         self.button_layout = QtGui.QHBoxLayout()
         # self.button_layout.addWidget(self.btn_setting)
@@ -202,7 +199,7 @@ class MainForm(QtGui.QMainWindow):
         self.button_layout.addWidget(self.btn_calc)
         self.button_layout.addWidget(self.btn_exit)
         self.button_layout.addWidget(self.btn_restart)
-        #self.button_layout.addWidget(self.text)
+        self.button_layout.addWidget(self.text)
 
         for i in range(self.sl.mDevice.cpu_num):
             ckb = QtGui.QCheckBox('CPU' + str(i))
@@ -246,6 +243,8 @@ class MainForm(QtGui.QMainWindow):
         self.btn_exit.setEnabled(False)
         self.btn_restart.clicked.connect(self.restartProcess)
         self.btn_restart.setEnabled(False)
+        self.text.textChanged.connect(self.textChangedProcess)
+
 
         # Add plots windows
         self.plot_layout = QtGui.QVBoxLayout()
@@ -262,6 +261,17 @@ class MainForm(QtGui.QMainWindow):
 
         self.setCentralWidget(self.main_widget)
         self.statusBar().showMessage("Ready!")
+
+    def textChangedProcess(self):
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
+        appname = str(self.text.text())
+        self.sl.appNane = appname
+        print(self.text.text())
+        size = appname.__sizeof__()*4
+        if(size > 32):
+            self.text.setFixedWidth(size)
+
 
     def closeEvent(self, event):
         if self.mActivity == True:
@@ -351,6 +361,7 @@ class MainForm(QtGui.QMainWindow):
         if self.mActivity == True:
             QtGui.QMessageBox.question(self, 'Message', "Please STOP capture first!")
         else:
+            print(self.sl.appNane)
             self.sl = streamline.Streamline(self.sl.mPlatform, self.sl.appNane)
             self.cblist = []
             self.initUI()
