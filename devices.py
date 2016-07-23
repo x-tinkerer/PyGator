@@ -58,6 +58,21 @@ class M86(object):
         self.show_temp = 0
         self.show_num = 10
 
+class M96(object):
+    def __init__(self):
+        self.dev = 'M96'
+        self.cpu_num = 8
+        self.clusters = 2
+        self.cluster_0 = 4
+        self.cluster_1 = 4
+        self.cluster_2 = 0
+
+        self.show_cpu = 1
+        self.show_gpu = 1
+        self.show_fps = 1
+        self.show_temp = 1
+        self.show_num = 12
+
 
 class Devices(object):
     def __init__(self, name):
@@ -72,3 +87,5 @@ class Devices(object):
             return M95()
         if self.dev == 'MA02' or self.dev == 'ma02':
             return MA02()
+        if self.dev == 'M96' or self.dev == 'm96':
+            return M96()
