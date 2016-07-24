@@ -70,8 +70,8 @@ class M96(object):
         self.show_cpu = 1
         self.show_gpu = 1
         self.show_fps = 1
-        self.show_temp = 1
-        self.show_num = 12
+        self.show_temp = 0
+        self.show_num = 10
 
 
 class Devices(object):
