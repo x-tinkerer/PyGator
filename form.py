@@ -134,14 +134,14 @@ class MyDynamicMplCanvas(MyMplCanvas):
                 ycput = np.array(self.sl.mBuf.mDisplayData.cpu_temp[0])
                 self.axes[self.cpunum + self.temp_pos].plot(xcput, ycput, 'r')
                 self.axes[self.cpunum + self.temp_pos].set_xlim(xminlimit, xmaxlimit)
-                self.axes[self.cpunum + self.temp_pos].set_ylim(40, 80)
+                self.axes[self.cpunum + self.temp_pos].set_ylim(35, 70)
 
                 # Show Board Temp
                 xboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[1])
                 yboardt = np.array(self.sl.mBuf.mDisplayData.board_temp[0])
                 self.axes[self.cpunum + self.temp_pos + 1].plot(xboardt, yboardt, 'b')
                 self.axes[self.cpunum + self.temp_pos + 1].set_xlim(xminlimit, xmaxlimit)
-                self.axes[self.cpunum + self.temp_pos + 1].set_ylim(30, 60)
+                self.axes[self.cpunum + self.temp_pos + 1].set_ylim(25, 55)
 
             self.draw()
 
@@ -328,9 +328,12 @@ class MainForm(QtGui.QMainWindow):
 
             if self.sl.mDevice.show_fps == 1:
                 self.sl.mXls.writeFpsinfo(self.sl.mBuf.mDisplayData.fpsinfo)
+                self.sl.mXls.writeFpsDetailData(self.sl.mBuf.mDisplayData.fps)
 
             if self.sl.mDevice.show_temp == 1:
                 self.sl.mXls.writeTempinfo(self.sl.mBuf.mDisplayData.cpu_temp_info, self.sl.mBuf.mDisplayData.board_temp_info)
+                self.sl.mXls.writeTempDetailData(self.sl.mBuf.mDisplayData.cpu_temp, self.sl.mBuf.mDisplayData.board_temp)
+
             self.sl.mXls.write_suggestion_info()
             self.sl.mXls.finish()
             QtGui.QMessageBox.question(self, 'Message', "Calc and Write Done")

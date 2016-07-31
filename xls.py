@@ -30,7 +30,10 @@ class Xls(object):
         self.showsheet = self.workbook.add_worksheet()
         self.cpusheet = self.workbook.add_worksheet()
         self.gpusheet = self.workbook.add_worksheet()
+        self.fpsdetailsheet = self.workbook.add_worksheet()
         self.fpssheet = self.workbook.add_worksheet()
+        self.cputempdetailsheet = self.workbook.add_worksheet()
+        self.boardtempdetailsheet = self.workbook.add_worksheet()
         self.tempsheet = self.workbook.add_worksheet()
 
         bold = self.workbook.add_format({'bold': True})
@@ -44,8 +47,17 @@ class Xls(object):
         gheadings = ['GPUFreq', 'Times']
         self.gpusheet.write_row('A1', gheadings, bold)
 
+        fheadings = ['TIME', 'FPS']
+        self.fpsdetailsheet.write_row('A1', fheadings, bold)
+
         fheadings = ['FPS', 'Counts']
         self.fpssheet.write_row('A1', fheadings, bold)
+
+        fheadings = ['TIME', 'CPU TEMP']
+        self.cputempdetailsheet.write_row('A1', fheadings, bold)
+
+        fheadings = ['TIME', 'BOARD TEMP']
+        self.boardtempdetailsheet.write_row('A1', fheadings, bold)
 
         fheadings = ['Min Temp', 'Max Temp', 'Avg Temp']
         self.tempsheet.write_row('A1', fheadings, bold)
@@ -116,6 +128,12 @@ class Xls(object):
         chart.set_size({'width': 300, 'height': 250})
         self.showsheet.insert_chart('C2', chart, {'x_offset': 100, 'y_offset': 500})
 
+    def writeFpsDetailData(self, fpsdata):
+        size = fpsdata[0].__len__()
+        for i in range(size):
+            self.fpsdetailsheet.write(i + 1, 1, fpsdata[0][i])
+            self.fpsdetailsheet.write(i + 1, 0, fpsdata[1][i])
+
     def writeFpsinfo(self, fpsinfo):
 
         self.fpsinfo = fpsinfo
@@ -145,6 +163,17 @@ class Xls(object):
         # Insert the chart into the worksheet (with an offset).
         chart.set_size({'width': 300, 'height': 250})
         self.showsheet.insert_chart('C2', chart, {'x_offset': 500, 'y_offset': 500})
+
+    def writeTempDetailData(self, cputemp, boardtemp):
+        ctempsize = cputemp[0].__len__()
+        for i in range(ctempsize):
+            self.cputempdetailsheet.write(i + 1, 1, cputemp[0][i])
+            self.cputempdetailsheet.write(i + 1, 0, cputemp[1][i])
+
+        btempsize = boardtemp[0].__len__()
+        for i in range(btempsize):
+            self.boardtempdetailsheet.write(i + 1, 1, boardtemp[0][i])
+            self.boardtempdetailsheet.write(i + 1, 0, boardtemp[1][i])
 
     def writeTempinfo(self, cputemp, boardtemp):
 
