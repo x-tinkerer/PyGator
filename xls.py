@@ -150,8 +150,8 @@ class Xls(object):
         # Configure the series. Note the use of the list syntax to define ranges:
         chart.add_series({
             'name': 'FPS Info',
-            'categories': ['Sheet4', 1, 0, row, 0],
-            'values': ['Sheet4', 1, 1, row, 1],
+            'categories': ['Sheet5', 1, 0, row, 0],
+            'values': ['Sheet5', 1, 1, row, 1],
         })
 
         # Add a title.
@@ -196,14 +196,14 @@ class Xls(object):
         # Configure the series. Note the use of the list syntax to define ranges:
         chart.add_series({
             'name': 'CPU',
-            'categories': ['Sheet5', 1, 0, 1, 2],
-            'values': ['Sheet5', 1, 0, 1, 2],
+            'categories': ['Sheet8', 1, 0, 1, 2],
+            'values': ['Sheet8', 1, 0, 1, 2],
         })
 
         chart.add_series({
             'name': 'Board',
-            'categories': ['Sheet5', 1, 0, 1, 2],
-            'values': ['Sheet5', 2, 0, 2, 2],
+            'categories': ['Sheet8', 1, 0, 1, 2],
+            'values': ['Sheet8', 2, 0, 2, 2],
         })
 
         # Add a title.
